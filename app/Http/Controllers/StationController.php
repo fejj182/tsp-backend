@@ -14,7 +14,7 @@ class StationController extends Controller
         return Station::all();
     }
 
-    public function nearest(Request $request): Collection
+    public function nearest(Request $request): Station
     {
         $lat = $request->input('lat');
         $lon = $request->input('lon');
@@ -30,7 +30,6 @@ class StationController extends Controller
          ) AS distance', [$lat, $lon, $lat])
         ->where('enabled', 1)
         ->orderBy('distance', 'asc')
-        ->take(1)
-        ->get();
+        ->first();
     }
 }
