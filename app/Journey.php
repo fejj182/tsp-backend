@@ -4,8 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Station extends Model
+class Journey extends Model
 {
     public $timestamps = false;
-    protected $table = 'stations';
+    protected $table = 'journeys';
 }
