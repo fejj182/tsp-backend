@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Stop extends Model
+class Route extends Model
 {
     public $timestamps = false;
-    protected $table = 'stops';
+    protected $table = 'routes';
 }
