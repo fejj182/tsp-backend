@@ -11,9 +11,12 @@ use Illuminate\Support\Collection;
 
 class StationController extends Controller
 {
-    public function __construct() {
-        $this->stationRepository = new StationRepository();
-        $this->stopRepository = new StopRepository();
+    protected $stations;
+    protected $stops;
+
+    public function __construct(StationRepository $stations, StopRepository $stops) {
+        $this->stations = $stations;
+        $this->stops = $stops;
     }
 
     public function index(): Collection
@@ -26,9 +29,9 @@ class StationController extends Controller
         $lat = $request->input('lat');
         $lon = $request->input('lon');
 
-        $nearestStation = $this->stationRepository->getNearestStation($lat, $lon);
+        $nearestStation = $this->stations->getNearestStation($lat, $lon);
         $journeyIds = $this->getJourneyIdsContainingStation($nearestStation);
-        $journeyStops = $this->stopRepository->getStopsForJourneys($journeyIds);
+        $journeyStops = $this->stops->getStopsForJourneys($journeyIds);
         $connectingStations = $this->getConnectionsForStation($nearestStation, $journeyStops);
 
         $nearestStation['connectingStations'] = $connectingStations->values();
