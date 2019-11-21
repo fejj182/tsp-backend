@@ -6,11 +6,11 @@ use App\Models\Station;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class EndpointsTest extends TestCase
+class StationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testStations()
+    public function testAll()
     {
         factory(Station::class)->create([
             'name' => 'Barcelona-Sants',
@@ -20,7 +20,7 @@ class EndpointsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testStationsNearest()
+    public function testNearest()
     {
         factory(Station::class)->create([
             'name' => 'Barcelona-Sants',
@@ -30,7 +30,7 @@ class EndpointsTest extends TestCase
             'lat' => '39.465064',
             'lon' => '-0.377433'
         ]);
-        $response = $this->post('/api/stations/nearest', ["lat" => "39.465064", "lon" => "-0.377433"]);
+        $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lon" => "-0.377"]);
         $response->assertJsonFragment(["name" => "Valencia-Estacio del Nord"]);
         $response->assertStatus(200);
     }

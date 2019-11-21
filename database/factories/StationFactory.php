@@ -12,6 +12,6 @@ $factory->define(Station::class, function (Faker $faker) {
         'name' => $faker->city,
         'lat' => $faker->latitude,
         'lon' => $faker->longitude,
-        'enabled' => $faker->boolean,
+        'enabled' => true,
     ];
 });
