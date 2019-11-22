@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Station;
+use App\Models\Stop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,16 +23,36 @@ class StationsTest extends TestCase
 
     public function testNearest()
     {
-        factory(Station::class)->create([
+        $barcelona = [
             'name' => 'Barcelona-Sants',
-        ]);
-        factory(Station::class)->create([
+            'lat' => '41.379520',
+            'lon' => '2.140624'
+        ];
+        $valencia = [
             'name' => 'Valencia-Estacio del Nord',
             'lat' => '39.465064',
             'lon' => '-0.377433'
-        ]);
+        ];
+
+        $this->createStation($barcelona);
+        $this->createStation($valencia);
+
         $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lon" => "-0.377"]);
-        $response->assertJsonFragment(["name" => "Valencia-Estacio del Nord"]);
+
+        $nearest = $valencia;
+        $nearest["connectingStations"] = array($barcelona);
+        
+        $response->assertExactJson($nearest);
         $response->assertStatus(200);
+    }
+
+    private function createStation($data) 
+    {
+        factory(Station::class)->create($data)->each(function ($station) {
+            $station->stops()->save(factory(Stop::class)->make([
+                'station_id' => $station->station_id,
+                'journey_id' => '123ABC'
+            ]));
+        });
     }
 }
