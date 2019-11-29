@@ -27,9 +27,9 @@ class StationController extends Controller
     public function nearest(Request $request)
     {
         $lat = $request->input('lat');
-        $lon = $request->input('lon');
+        $lng = $request->input('lng');
 
-        $nearestStation = $this->stations->getNearestStation($lat, $lon);
+        $nearestStation = $this->stations->getNearestStation($lat, $lng);
         $journeyIds = $this->getJourneyIdsContainingStation($nearestStation);
         $journeyStops = $this->stops->getStopsForJourneys($journeyIds);
         $connectingStations = $this->getConnectionsForStation($nearestStation, $journeyStops);

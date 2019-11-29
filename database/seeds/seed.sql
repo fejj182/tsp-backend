@@ -1,7 +1,7 @@
 insert into routes (route_id, service_name)
 select route_id, route_short_name from renfe_horarios.routes;
 
-insert into stations (station_id, name, lat, lon)
+insert into stations (station_id, name, lat, lng)
 select stop_id, stop_name, stop_lat, stop_lon from renfe_horarios.stops;
 
 update stations set enabled=1 where station_id in ('71801', '65000', '18000');

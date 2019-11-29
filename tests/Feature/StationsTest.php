@@ -26,18 +26,18 @@ class StationsTest extends TestCase
         $barcelona = [
             'name' => 'Barcelona-Sants',
             'lat' => '41.379520',
-            'lon' => '2.140624'
+            'lng' => '2.140624'
         ];
         $valencia = [
             'name' => 'Valencia-Estacio del Nord',
             'lat' => '39.465064',
-            'lon' => '-0.377433'
+            'lng' => '-0.377433'
         ];
 
         $this->createStation($barcelona);
         $this->createStation($valencia);
 
-        $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lon" => "-0.377"]);
+        $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lng" => "-0.377"]);
 
         $nearest = $valencia;
         $nearest["connectingStations"] = array($barcelona);
