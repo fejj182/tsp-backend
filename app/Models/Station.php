@@ -3,7 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+/**
+ * @property int $id
+ * @property string $station_id
+ * @property string $name
+ * @property string $lat
+ * @property string $lng
+ * @property int $enabled
+ */
 class Station extends Model
 {
     public $timestamps = false;
