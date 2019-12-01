@@ -33,9 +33,17 @@ class StationsTest extends TestCase
             'lat' => '39.465064',
             'lng' => '-0.377433'
         ];
+        $disabled = [
+            'name' => 'Glasgow',
+            'lat' => '0',
+            'lng' => '0',
+            'enabled' => false
+        ];
 
         $this->createStation($barcelona);
         $this->createStation($valencia);
+        $this->createStation($disabled);
+
 
         $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lng" => "-0.377"]);
 
