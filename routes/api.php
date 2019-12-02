@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/stations', 'StationController@index');
+Route::get('/stations', 'StationController@enabled');
 
 Route::post('/stations/nearest', 'StationController@nearest');
 

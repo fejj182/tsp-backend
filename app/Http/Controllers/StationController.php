@@ -17,9 +17,9 @@ class StationController extends Controller
         $this->stations = $stations;
     }
 
-    public function index(): Collection
+    public function enabled(): Collection
     {
-        return Station::all();
+        return $this->stations->enabled();
     }
 
     public function nearest(Request $request)

@@ -13,6 +13,13 @@ class StationRepository
     $this->stops = $stops;
   }
 
+  public function enabled() 
+  {
+    return Station::query()
+    ->where('enabled', true)
+    ->get();
+  }
+
   public function getNearestStation(string $lat, string $lng): Station
   {
     return Station::query()
