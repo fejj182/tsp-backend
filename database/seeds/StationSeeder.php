@@ -12,7 +12,7 @@ class StationSeeder extends Seeder
      */
     public function run()
     {
-        $rows = array_map('str_getcsv', file('database/seeds/stops.csv'));
+        $rows = array_map('str_getcsv', file('database/seeds/data/stops.csv'));
 
          foreach($rows as $row) {
             $enabled = false;

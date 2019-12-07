@@ -11,4 +11,4 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 _ide_helper*
-database/seeds/*.csv
+database/seeds/data/*
