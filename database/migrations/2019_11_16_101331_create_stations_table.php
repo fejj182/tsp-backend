@@ -14,7 +14,7 @@ class CreateStationsTable extends Migration
     public function up()
     {
         Schema::create('stations', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id');
             $table->char('station_id', 5)->unique();
             $table->char('name');
             $table->char('lat');

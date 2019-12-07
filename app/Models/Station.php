@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Ramsey\Uuid\Uuid;
 /**
  * @property int $id
  * @property string $station_id
@@ -14,8 +15,18 @@ use Illuminate\Database\Eloquent\Model;
 class Station extends Model
 {
     public $timestamps = false;
+    public $incrementing = false;
     protected $table = 'stations';
     protected $hidden = ['id', 'station_id', 'enabled', 'distance', 'stops'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($station) {
+            $station->{$station->getKeyName()} = (string) Uuid::uuid4();
+        });
+    }
 
     public function stops()
     {
