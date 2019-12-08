@@ -27,11 +27,14 @@ class StationController extends Controller
         $lat = $request->input('lat');
         $lng = $request->input('lng');
 
-        $nearestStation = $this->stations->getNearestStation($lat, $lng);
-        $connectingStations = $this->stations->getConnectingStations($nearestStation);
+        return $this->stations->getNearestStation($lat, $lng);
+    }
 
-        $nearestStation['connectingStations'] = $connectingStations->values();
+    public function connections(Request $request)
+    {
+        $stationId = $request->input('stationId');
 
-        return $nearestStation;
+        $station = Station::find($stationId);
+        return $this->stations->getConnectingStations($station)->values();
     }
 }

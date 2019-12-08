@@ -13,7 +13,7 @@ class StationRepository
     $this->stops = $stops;
   }
 
-  public function enabled() 
+  public function enabled(): Collection
   {
     return Station::query()
     ->where('enabled', true)

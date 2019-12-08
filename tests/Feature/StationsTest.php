@@ -10,23 +10,33 @@ use Tests\TestCase;
 class StationsTest extends TestCase
 {
     use RefreshDatabase;
-    
-    protected $barcelona = [
-        'name' => 'Barcelona-Sants',
-        'lat' => '41.379520',
-        'lng' => '2.140624'
-    ];
-    protected $valencia = [
-        'name' => 'Valencia-Estacio del Nord',
-        'lat' => '39.465064',
-        'lng' => '-0.377433'
-    ];
-    protected $disabled = [
-        'name' => 'Glasgow',
-        'lat' => '0',
-        'lng' => '0',
-        'enabled' => false
-    ];
+
+    protected $barcelona;
+    protected $valencia;
+    protected $disabled;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->barcelona = [
+            'name' => 'Barcelona-Sants',
+            'lat' => '41.379520',
+            'lng' => '2.140624'
+        ];
+        $this->valencia = [
+            'name' => 'Valencia-Estacio del Nord',
+            'lat' => '39.465064',
+            'lng' => '-0.377433'
+        ];
+        $this->disabled = [
+            'name' => 'Glasgow',
+            'lat' => '0',
+            'lng' => '0',
+            'enabled' => false
+        ];
+
+    }
 
     public function testEnabled()
     {
@@ -45,22 +55,30 @@ class StationsTest extends TestCase
         $this->createStation($this->valencia);
         $this->createStation($this->disabled);
 
-        $response = $this->post('/api/stations/nearest', ["lat" => "39.465", "lng" => "-0.377"]);
-
-        $nearest = $this->valencia;
-        $nearest["connectingStations"] = array($this->barcelona);
+        $response = $this->post('/api/stations/nearest', ["lat" => "41.379520", "lng" => "2.140624"]);
         
-        $response->assertExactJson($nearest);
+        $response->assertExactJson($this->barcelona);
         $response->assertStatus(200);
     }
 
-    private function createStation($data) 
+    public function testConnections()
     {
-        factory(Station::class)->create($data)->each(function ($station) {
-            $station->stops()->save(factory(Stop::class)->make([
-                'station_id' => $station->station_id,
-                'journey_id' => '123ABC'
-            ]));
-        });
+        $barcelona = $this->createStation($this->barcelona);
+        $this->createStation($this->valencia);
+
+        $response = $this->post('/api/stations/connections', ["stationId" => $barcelona->id]);
+
+        $response->assertExactJson([$this->valencia]);
+        $response->assertStatus(200);
+    }
+
+    private function createStation($data): Station
+    {
+        $station = factory(Station::class)->create($data);
+        $station->stops()->save(factory(Stop::class)->make([
+            'station_id' => $station->station_id,
+            'journey_id' => '123ABC'
+        ]));
+        return $station;
     }
 }
