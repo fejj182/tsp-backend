@@ -12,9 +12,11 @@ use Illuminate\Support\Collection;
 class StationController extends Controller
 {
     protected $stations;
+    protected $stops;
 
-    public function __construct(StationRepository $stations) {
+    public function __construct(StationRepository $stations, StopRepository $stops) {
         $this->stations = $stations;
+        $this->stops = $stops;
     }
 
     public function enabled(): Collection
@@ -35,6 +37,13 @@ class StationController extends Controller
         $stationId = $request->input('stationId');
 
         $station = Station::find($stationId);
-        return $this->stations->getConnectingStations($station)->values();
+        return $this->stations->getConnectingStations($station)->each(function($connection) use($station) {
+            $journeyId = $this->stops->getJourneyToDisplayBetweenStations($station, $connection);
+            $stops = $this->stops->getStopsFromJourneyId($journeyId);
+            $connection->coords = $stops->map(function($stop) {
+                return ["lat" => $stop->station->lat, "lng" => $stop->station->lng];
+            });
+            return $connection;
+        })->values();
     }
 }

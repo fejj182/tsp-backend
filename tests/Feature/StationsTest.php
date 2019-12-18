@@ -26,6 +26,13 @@ class StationsTest extends TestCase
             'lat' => '41.379520',
             'lng' => '2.140624'
         ];
+        $this->cuenca = [
+            'id' => Uuid::uuid4(),
+            'name' => 'Cuenca',
+            'lat' => '40.06734',
+            'lng' => '-2.136471',
+            'enabled' => false
+        ];
         $this->valencia = [
             'id' => Uuid::uuid4(),
             'name' => 'Valencia-Estacio del Nord',
@@ -39,7 +46,6 @@ class StationsTest extends TestCase
             'lng' => '0',
             'enabled' => false
         ];
-
     }
 
     public function testEnabled()
@@ -69,10 +75,26 @@ class StationsTest extends TestCase
     {
         $barcelona = $this->createStation($this->barcelona);
         $this->createStation($this->valencia);
+        $this->createStation($this->cuenca);
 
         $response = $this->post('/api/stations/connections', ["stationId" => $barcelona->id]);
 
-        $response->assertExactJson([$this->valencia]);
+        $expectedResponse = array($this->valencia);
+        $expectedResponse[0]["coords"] = array(
+            [
+                "lat" => $this->barcelona["lat"], 
+                "lng" => $this->barcelona["lng"]
+            ],
+            [
+                "lat" => $this->cuenca["lat"], 
+                "lng" => $this->cuenca["lng"]
+            ],
+            [
+                "lat" => $this->valencia["lat"], 
+                "lng" => $this->valencia["lng"]
+            ]
+        );
+        $response->assertExactJson($expectedResponse);
         $response->assertStatus(200);
     }
 
