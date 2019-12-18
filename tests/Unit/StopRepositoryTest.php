@@ -9,7 +9,11 @@ use Tests\TestCase;
 
 class StopRepositoryTest extends TestCase
 {
-    public function testGetStopsConnectedToStation_shouldReturnJourneyId()
+
+    /**
+     * @test
+     */
+    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyId()
     {
         $stops = new StopRepository();
 
@@ -27,24 +31,48 @@ class StopRepositoryTest extends TestCase
         return $stop;
     }
 
-    public function testGetStopsConnectedToStation_shouldReturnJourneyIdWithLongestJourney()
+    /**
+     * @test
+     */
+    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyIdWithLongestJourney()
     {
         $stops = new StopRepository();
 
         $start = $this->createStop('1', '1-2');
-        $middle = $this->createStop('2', '1-2');
+        $end = $this->createStop('2', '1-2');
 
         $start->stops()->save(factory(Stop::class)->create([
             'stop_sequence' => '1',
             'journey_id' => '1-2-3'
         ]));
-        $middle->stops()->save(factory(Stop::class)->create([
-            'stop_sequence' => '2',
+        
+        $this->createStop('2', '1-2-3');
+        $end->stops()->save(factory(Stop::class)->create([
+            'stop_sequence' => '3',
             'journey_id' => '1-2-3'
         ]));
 
-        $end = $this->createStop('3', '1-2-3');
-    
         $this->assertEquals('1-2-3', $stops->getJourneyToDisplayBetweenStations($start, $end));
+    }
+
+    /**
+     * @test
+     */
+    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyIdWithBothStations()
+    {
+        $stops = new StopRepository();
+
+        $start = $this->createStop('1', '1-2');
+        $start->stops()->save(factory(Stop::class)->create([
+            'stop_sequence' => '3',
+            'journey_id' => '2'
+        ]));
+        $end = $this->createStop('2', '1-2');
+        $end->stops()->save(factory(Stop::class)->create([
+            'stop_sequence' => '4',
+            'journey_id' => '3'
+        ]));
+        
+        $this->assertEquals('1-2', $stops->getJourneyToDisplayBetweenStations($start, $end));
     }
 }

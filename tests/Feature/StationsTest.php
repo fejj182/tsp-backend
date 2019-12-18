@@ -82,16 +82,16 @@ class StationsTest extends TestCase
         $expectedResponse = array($this->valencia);
         $expectedResponse[0]["coords"] = array(
             [
-                "lat" => $this->barcelona["lat"], 
-                "lng" => $this->barcelona["lng"]
+                floatval($this->barcelona["lng"]), 
+                floatval($this->barcelona["lat"])
             ],
             [
-                "lat" => $this->cuenca["lat"], 
-                "lng" => $this->cuenca["lng"]
+                floatval($this->cuenca["lng"]), 
+                floatval($this->cuenca["lat"])
             ],
             [
-                "lat" => $this->valencia["lat"], 
-                "lng" => $this->valencia["lng"]
+                floatval($this->valencia["lng"]), 
+                floatval($this->valencia["lat"])
             ]
         );
         $response->assertExactJson($expectedResponse);

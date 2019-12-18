@@ -41,7 +41,7 @@ class StationController extends Controller
             $journeyId = $this->stops->getJourneyToDisplayBetweenStations($station, $connection);
             $stops = $this->stops->getStopsFromJourneyId($journeyId);
             $connection->coords = $stops->map(function($stop) {
-                return ["lat" => $stop->station->lat, "lng" => $stop->station->lng];
+                return [floatval($stop->station->lng), floatval($stop->station->lat)];
             });
             return $connection;
         })->values();

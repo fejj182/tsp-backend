@@ -20,13 +20,28 @@ class StopRepository
     ->get();
   }
 
-  public function getJourneyToDisplayBetweenStations(Station $start, Station $end): string 
+  public function getJourneyToDisplayBetweenStations(Station $start, Station $end)
+  {
+    $stopsWithStartStation = $this->getJourneyIdsContainingStation($start);
+    $stopsWithEndStation = $this->getJourneyIdsContainingStation($end);
+
+    $sharedJourneys = $stopsWithStartStation->intersect($stopsWithEndStation);
+
+    return Stop::query()
+    ->whereIn('journey_id', $sharedJourneys)
+    ->orderByDesc('stop_sequence')
+    ->first()
+    ->journey_id;
+  }
+
+  public function getJourneyIdsContainingStation(Station $station)
   {
     return Stop::query()
-    ->where('station_id', $start->station_id)
-    ->orWhere('station_id', $end->station_id)
-    ->orderBy('stop_sequence', 'DESC')
-    ->value('journey_id');
+    ->where('station_id', $station->station_id)
+    ->get()
+    ->map(function($journey) {
+      return $journey->journey_id;
+    });
   }
 
   public function getStopsFromJourneyId(String $journeyId): Collection 
