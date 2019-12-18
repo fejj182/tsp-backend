@@ -6,6 +6,7 @@ use App\Models\Station;
 use App\Models\Stop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Ramsey\Uuid\Uuid;
 
 class StationsTest extends TestCase
 {
@@ -20,16 +21,19 @@ class StationsTest extends TestCase
         parent::setUp();
 
         $this->barcelona = [
+            'id' => Uuid::uuid4(),
             'name' => 'Barcelona-Sants',
             'lat' => '41.379520',
             'lng' => '2.140624'
         ];
         $this->valencia = [
+            'id' => Uuid::uuid4(),
             'name' => 'Valencia-Estacio del Nord',
             'lat' => '39.465064',
             'lng' => '-0.377433'
         ];
         $this->disabled = [
+            'id' => Uuid::uuid4(),
             'name' => 'Glasgow',
             'lat' => '0',
             'lng' => '0',

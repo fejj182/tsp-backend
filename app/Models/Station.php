@@ -17,14 +17,16 @@ class Station extends Model
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'stations';
-    protected $hidden = ['id', 'station_id', 'enabled', 'distance', 'stops'];
+    protected $hidden = ['station_id', 'enabled', 'distance', 'stops'];
 
     protected static function boot()
     {
         parent::boot();
 
         static::creating(function ($station) {
-            $station->{$station->getKeyName()} = (string) Uuid::uuid4();
+            if (!$station->{$station->getKeyName()}) {
+                $station->{$station->getKeyName()} = (string) Uuid::uuid4();
+            }
         });
     }
 
