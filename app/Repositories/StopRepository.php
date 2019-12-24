@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Stop;
 use App\Models\Station;
-use DB;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class StopRepository
 {
@@ -20,19 +20,38 @@ class StopRepository
     ->get();
   }
 
-  public function getJourneyToDisplayBetweenStations(Station $start, Station $end): string 
+  public function getStopsToDisplayBetweenStations(Station $start, Station $end): Collection
   {
-    return Stop::query()
-    ->where('station_id', $start->station_id)
-    ->orWhere('station_id', $end->station_id)
-    ->orderBy('stop_sequence', 'DESC')
-    ->value('journey_id');
+    $journeyIdsContainingStartStation = $this->getJourneyIdsContainingStation($start);
+    $journeyIdsContainingEndStation = $this->getJourneyIdsContainingStation($end);
+    $sharedJourneyIds = $journeyIdsContainingStartStation->intersect($journeyIdsContainingEndStation);
+
+    $stopFromLongestJourney = $this->getStopFromLongestJourney($sharedJourneyIds);
+    return $this->getConnectedStops($stopFromLongestJourney);
   }
 
-  public function getStopsFromJourneyId(String $journeyId): Collection 
+  private function getJourneyIdsContainingStation(Station $station): SupportCollection
   {
     return Stop::query()
-    ->where('journey_id', $journeyId)
+    ->where('station_id', $station->station_id)
+    ->get()
+    ->map(function($journey) {
+      return $journey->journey_id;
+    });
+  }
+
+  private function getStopFromLongestJourney(SupportCollection $journeys): Stop
+  {
+    return Stop::query()
+    ->whereIn('journey_id', $journeys)
+    ->orderByDesc('stop_sequence')
+    ->first();
+  }
+
+  private function getConnectedStops(Stop $stop): Collection 
+  {
+    return Stop::query()
+    ->where('journey_id', $stop->journey_id)
     ->get();
   }
 }
