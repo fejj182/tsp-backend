@@ -5,21 +5,23 @@ namespace Tests\Unit;
 use App\Models\Station;
 use App\Models\Stop;
 use App\Repositories\StopRepository;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StopRepositoryTest extends TestCase
 {
+    use RefreshDatabase;
 
     /**
      * @test
      */
-    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyId()
+    public function getStopsToDisplayBetweenStations_shouldReturnJourneyId()
     {
         $stops = new StopRepository();
 
         $start = $this->createStop('1', '1-2');
         $end = $this->createStop('2', '1-2');
-        $this->assertEquals('1-2', $stops->getJourneyToDisplayBetweenStations($start, $end));
+        $this->assertEquals(Stop::all(), $stops->getStopsToDisplayBetweenStations($start, $end));
     }
 
     private function createStop(String $stopSequence, String $journeyId) {
@@ -34,7 +36,7 @@ class StopRepositoryTest extends TestCase
     /**
      * @test
      */
-    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyIdWithLongestJourney()
+    public function getStopsToDisplayBetweenStations_shouldReturnJourneyIdWithLongestJourney()
     {
         $stops = new StopRepository();
 
@@ -52,13 +54,13 @@ class StopRepositoryTest extends TestCase
             'journey_id' => '1-2-3'
         ]));
 
-        $this->assertEquals('1-2-3', $stops->getJourneyToDisplayBetweenStations($start, $end));
+        $this->assertEquals(Stop::query()->where('journey_id', '1-2-3')->get(), $stops->getStopsToDisplayBetweenStations($start, $end));
     }
 
     /**
      * @test
      */
-    public function getJourneyToDisplayBetweenStations_shouldReturnJourneyIdWithBothStations()
+    public function getStopsToDisplayBetweenStations_shouldReturnJourneyIdWithBothStations()
     {
         $stops = new StopRepository();
 
@@ -73,6 +75,6 @@ class StopRepositoryTest extends TestCase
             'journey_id' => '3'
         ]));
         
-        $this->assertEquals('1-2', $stops->getJourneyToDisplayBetweenStations($start, $end));
+        $this->assertEquals(Stop::query()->where('journey_id', '1-2')->get(), $stops->getStopsToDisplayBetweenStations($start, $end));
     }
 }

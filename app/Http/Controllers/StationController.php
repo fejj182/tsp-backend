@@ -38,8 +38,7 @@ class StationController extends Controller
 
         $station = Station::find($stationId);
         return $this->stations->getConnectingStations($station)->each(function($connection) use($station) {
-            $journeyId = $this->stops->getJourneyToDisplayBetweenStations($station, $connection);
-            $stops = $this->stops->getStopsFromJourneyId($journeyId);
+            $stops = $this->stops->getStopsToDisplayBetweenStations($station, $connection);
             $connection->coords = $stops->map(function($stop) {
                 return [floatval($stop->station->lng), floatval($stop->station->lat)];
             });

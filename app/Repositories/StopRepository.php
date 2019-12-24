@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Stop;
 use App\Models\Station;
-use DB;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class StopRepository
 {
@@ -20,21 +20,17 @@ class StopRepository
     ->get();
   }
 
-  public function getJourneyToDisplayBetweenStations(Station $start, Station $end)
+  public function getStopsToDisplayBetweenStations(Station $start, Station $end): Collection
   {
-    $stopsWithStartStation = $this->getJourneyIdsContainingStation($start);
-    $stopsWithEndStation = $this->getJourneyIdsContainingStation($end);
+    $journeyIdsContainingStartStation = $this->getJourneyIdsContainingStation($start);
+    $journeyIdsContainingEndStation = $this->getJourneyIdsContainingStation($end);
+    $sharedJourneyIds = $journeyIdsContainingStartStation->intersect($journeyIdsContainingEndStation);
 
-    $sharedJourneys = $stopsWithStartStation->intersect($stopsWithEndStation);
-
-    return Stop::query()
-    ->whereIn('journey_id', $sharedJourneys)
-    ->orderByDesc('stop_sequence')
-    ->first()
-    ->journey_id;
+    $stopFromLongestJourney = $this->getStopFromLongestJourney($sharedJourneyIds);
+    return $this->getConnectedStops($stopFromLongestJourney);
   }
 
-  public function getJourneyIdsContainingStation(Station $station)
+  private function getJourneyIdsContainingStation(Station $station): SupportCollection
   {
     return Stop::query()
     ->where('station_id', $station->station_id)
@@ -44,10 +40,18 @@ class StopRepository
     });
   }
 
-  public function getStopsFromJourneyId(String $journeyId): Collection 
+  private function getStopFromLongestJourney(SupportCollection $journeys): Stop
   {
     return Stop::query()
-    ->where('journey_id', $journeyId)
+    ->whereIn('journey_id', $journeys)
+    ->orderByDesc('stop_sequence')
+    ->first();
+  }
+
+  private function getConnectedStops(Stop $stop): Collection 
+  {
+    return Stop::query()
+    ->where('journey_id', $stop->journey_id)
     ->get();
   }
 }
