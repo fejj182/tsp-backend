@@ -37,12 +37,15 @@ class StationController extends Controller
         $stationId = $request->input('stationId');
 
         $station = Station::find($stationId);
-        return $this->stations->getConnectingStations($station)->each(function($connection) use($station) {
+        $connections = $this->stations->getConnectingStations($station);
+        
+        $connections->each(function($connection) use($station) {
             $stops = $this->stops->getStopsToDisplayBetweenStations($station, $connection);
             $connection->coords = $stops->map(function($stop) {
                 return [$stop->station->lng, $stop->station->lat];
             });
-            return $connection;
-        })->values();
+        });
+        
+        return $connections->values();
     }
 }
