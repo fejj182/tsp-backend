@@ -23,27 +23,27 @@ class StationsTest extends TestCase
         $this->barcelona = [
             'id' => Uuid::uuid4(),
             'name' => 'Barcelona-Sants',
-            'lat' => '41.379520',
-            'lng' => '2.140624'
+            'lat' => 41.379520,
+            'lng' => 2.140624
         ];
         $this->cuenca = [
             'id' => Uuid::uuid4(),
             'name' => 'Cuenca',
-            'lat' => '40.06734',
-            'lng' => '-2.136471',
+            'lat' => 40.06734,
+            'lng' => -2.136471,
             'enabled' => false
         ];
         $this->valencia = [
             'id' => Uuid::uuid4(),
             'name' => 'Valencia-Estacio del Nord',
-            'lat' => '39.465064',
-            'lng' => '-0.377433'
+            'lat' => 39.465064,
+            'lng' => -0.377433
         ];
         $this->disabled = [
             'id' => Uuid::uuid4(),
             'name' => 'Glasgow',
-            'lat' => '0',
-            'lng' => '0',
+            'lat' => 0,
+            'lng' => 0,
             'enabled' => false
         ];
     }
@@ -65,7 +65,7 @@ class StationsTest extends TestCase
         $this->createStation($this->valencia);
         $this->createStation($this->disabled);
 
-        $response = $this->post('/api/stations/nearest', ["lat" => "41.379520", "lng" => "2.140624"]);
+        $response = $this->post('/api/stations/nearest', ["lat" => 41.379520, "lng" => 2.140624]);
         
         $response->assertExactJson($this->barcelona);
         $response->assertStatus(200);
@@ -82,16 +82,16 @@ class StationsTest extends TestCase
         $expectedResponse = array($this->valencia);
         $expectedResponse[0]["coords"] = array(
             [
-                floatval($this->barcelona["lng"]), 
-                floatval($this->barcelona["lat"])
+                $this->barcelona["lng"], 
+                $this->barcelona["lat"]
             ],
             [
-                floatval($this->cuenca["lng"]), 
-                floatval($this->cuenca["lat"])
+                $this->cuenca["lng"], 
+                $this->cuenca["lat"]
             ],
             [
-                floatval($this->valencia["lng"]), 
-                floatval($this->valencia["lat"])
+                $this->valencia["lng"], 
+                $this->valencia["lat"]
             ]
         );
         $response->assertExactJson($expectedResponse);

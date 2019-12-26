@@ -17,8 +17,8 @@ class CreateStationsTable extends Migration
             $table->uuid('id');
             $table->char('station_id', 5)->unique();
             $table->char('name');
-            $table->char('lat');
-            $table->char('lng');
+            $table->double('lat');
+            $table->double('lng');
             $table->boolean('enabled')->default(false);
         });
     }

@@ -40,7 +40,7 @@ class StationController extends Controller
         return $this->stations->getConnectingStations($station)->each(function($connection) use($station) {
             $stops = $this->stops->getStopsToDisplayBetweenStations($station, $connection);
             $connection->coords = $stops->map(function($stop) {
-                return [floatval($stop->station->lng), floatval($stop->station->lat)];
+                return [$stop->station->lng, $stop->station->lat];
             });
             return $connection;
         })->values();
