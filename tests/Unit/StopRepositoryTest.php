@@ -15,66 +15,68 @@ class StopRepositoryTest extends TestCase
     /**
      * @test
      */
-    public function getStopsToDisplayBetweenStations_shouldReturnJourneyId()
+    public function getStopsToDisplayBetweenStations_shouldReturnStopsInJourney()
     {
         $stops = new StopRepository();
 
-        $start = $this->createStop('1', '1-2');
-        $end = $this->createStop('2', '1-2');
+        $start = $this->createStationWithStop('1', '1-2');
+        $end = $this->createStationWithStop('2', '1-2');
+        
         $this->assertEquals(Stop::all(), $stops->getStopsToDisplayBetweenStations($start, $end));
     }
 
-    private function createStop(String $stopSequence, String $journeyId) {
-        $stop = factory(Station::class)->create();
-        $stop->stops()->save(factory(Stop::class)->create([
+    private function createStationWithStop(String $stopSequence, String $journeyId) {
+        $station = factory(Station::class)->create();
+        $this->createStop($station, $stopSequence, $journeyId);
+        return $station;
+    }
+
+    private function createStop(Station $station, String $stopSequence, String $journeyId) {
+        $stop = factory(Stop::class)->create([
             'stop_sequence' => $stopSequence,
             'journey_id' => $journeyId
-        ]));
+        ]);
+        $station->stops()->save($stop);
         return $stop;
     }
 
     /**
      * @test
      */
-    public function getStopsToDisplayBetweenStations_shouldReturnJourneyIdWithLongestJourney()
+    public function getStopsToDisplayBetweenStations_shouldReturnStopsInLongerJourney()
     {
         $stops = new StopRepository();
 
-        $start = $this->createStop('1', '1-2');
-        $end = $this->createStop('2', '1-2');
+        $start = $this->createStationWithStop('1', '1-2');
+        $end = $this->createStationWithStop('2', '1-2');
 
-        $start->stops()->save(factory(Stop::class)->create([
-            'stop_sequence' => '1',
-            'journey_id' => '1-2-3'
-        ]));
-        
-        $this->createStop('2', '1-2-3');
-        $end->stops()->save(factory(Stop::class)->create([
-            'stop_sequence' => '3',
-            'journey_id' => '1-2-3'
-        ]));
+        $a = $this->createStop($start, '1', '1-2-3');
 
-        $this->assertEquals(Stop::query()->where('journey_id', '1-2-3')->get(), $stops->getStopsToDisplayBetweenStations($start, $end));
+        $middle = factory(Station::class)->create();
+        $b = $this->createStop($middle, '2', '1-2-3');
+
+        $c = $this->createStop($end, '3', '1-2-3');
+
+        $stopsToDisplay = $stops->getStopsToDisplayBetweenStations($start, $end);
+
+        $this->assertEquals(collect([$a, $b, $c])->toArray(), $stopsToDisplay->toArray());
     }
 
     /**
      * @test
      */
-    public function getStopsToDisplayBetweenStations_shouldReturnJourneyIdWithBothStations()
+    public function getStopsToDisplayBetweenStations_shouldReturnStopsInJourneyWithLowerLastStopNumberIfStopsNotOnSameJourney()
     {
         $stops = new StopRepository();
 
-        $start = $this->createStop('1', '1-2');
-        $start->stops()->save(factory(Stop::class)->create([
-            'stop_sequence' => '3',
-            'journey_id' => '2'
-        ]));
-        $end = $this->createStop('2', '1-2');
-        $end->stops()->save(factory(Stop::class)->create([
-            'stop_sequence' => '4',
-            'journey_id' => '3'
-        ]));
-        
-        $this->assertEquals(Stop::query()->where('journey_id', '1-2')->get(), $stops->getStopsToDisplayBetweenStations($start, $end));
+        $start = $this->createStationWithStop('3', '2');
+        $a = $this->createStop($start, '1', '1-2');
+
+        $end = $this->createStationWithStop('4', '3');
+        $b = $this->createStop($end, '2', '1-2');
+
+        $stopsToDisplay = $stops->getStopsToDisplayBetweenStations($start, $end);
+
+        $this->assertEquals(collect([$a, $b])->toArray(), $stopsToDisplay->toArray());
     }
 }
