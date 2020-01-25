@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\GoogleDrive;
 use Illuminate\Database\Seeder;
 
 class RouteSeeder extends Seeder
@@ -11,13 +12,18 @@ class RouteSeeder extends Seeder
      */
     public function run()
     {
-        $rows = array_map('str_getcsv', file('database/seeds/data/routes.csv'));
+        $googleDrive = new GoogleDrive();
+        $response = $googleDrive->getFile('1_V5ejhcH6FECAHrqs8DWRlQEx7goVyUP');
+        $lines = explode("\n", $response);
 
-         foreach($rows as $row) {
-            DB::table('routes')->insert([
-                'route_id' => $row[0],
-                'service_name' => $row[2]
-            ]);
+        foreach($lines as $line) {
+            if (strlen($line) > 0) {
+                $row = str_getcsv($line);
+                DB::table('routes')->insert([
+                    'route_id' => $row[0],
+                    'service_name' => $row[2]
+                ]);
+            }
         }
     }
 }
