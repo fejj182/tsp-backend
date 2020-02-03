@@ -11,7 +11,7 @@ aging
 agony
 ahead
 aide
-aids
+airy
 aim
 ajar
 alarm
@@ -45,8 +45,8 @@ armor
 army
 aroma
 array
+arrow
 arson
-art
 ashen
 ashes
 atlas
@@ -76,6 +76,7 @@ batch
 bath
 baton
 bats
+bendy
 blade
 blank
 blast
@@ -98,7 +99,6 @@ body
 boil
 bok
 bolt
-boned
 boney
 bonus
 bony
@@ -198,7 +198,6 @@ clay
 clean
 clear
 cleat
-cleft
 clerk
 click
 cling
@@ -214,6 +213,7 @@ coach
 coast
 coat
 cod
+coder
 coil
 coke
 cola
