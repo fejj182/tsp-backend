@@ -19,6 +19,4 @@ Route::post('/stations/nearest', 'StationController@nearest');
 
 Route::post('/stations/connections', 'StationController@connections');
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/trip', 'TripController@create');
