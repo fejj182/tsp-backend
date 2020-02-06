@@ -27,4 +27,9 @@ class Trip extends Model
             }
         });
     }
+
+    public function tripStops()
+    {
+        return $this->hasMany('App\Models\TripStop');
+    }
 }

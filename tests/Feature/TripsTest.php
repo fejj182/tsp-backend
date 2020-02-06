@@ -54,4 +54,13 @@ class TripsTest extends TestCase
             'position' => 1
         ]);
     }
+
+    public function testGetTrip()
+    {
+        $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia)]);
+        $trip = Trip::query()->first();
+        $response = $this->get('/api/trip/' . $trip->alias);
+        $response->assertStatus(200);
+        $response->assertExactJson([$this->barcelona, $this->valencia]);
+    }
 }

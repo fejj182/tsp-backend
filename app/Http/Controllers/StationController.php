@@ -24,7 +24,7 @@ class StationController extends Controller
         return $this->stations->enabled();
     }
 
-    public function nearest(Request $request)
+    public function nearest(Request $request): Station
     {
         $lat = $request->input('lat');
         $lng = $request->input('lng');
@@ -32,7 +32,7 @@ class StationController extends Controller
         return $this->stations->getNearestStation($lat, $lng);
     }
 
-    public function connections(Request $request)
+    public function connections(Request $request): Collection
     {
         $stationId = $request->input('stationId');
 
