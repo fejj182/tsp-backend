@@ -57,10 +57,10 @@ class TripsTest extends TestCase
 
     public function testGetTrip()
     {
-        $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia)]);
+        $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia, $this->barcelona)]);
         $trip = Trip::query()->first();
         $response = $this->get('/api/trip/' . $trip->alias);
         $response->assertStatus(200);
-        $response->assertExactJson([$this->barcelona, $this->valencia]);
+        $response->assertExactJson([$this->barcelona, $this->valencia, $this->barcelona]);
     }
 }

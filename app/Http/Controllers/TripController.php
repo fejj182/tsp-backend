@@ -20,10 +20,14 @@ class TripController extends Controller
         return ["alias" => $trip->alias];
     }
 
-    public function get(String $alias): Collection
+    public function get(String $alias): array
     {
         $trip = Trip::where('alias', $alias)->first();
         $tripStops = $trip->tripStops()->pluck('station_id');
-        return Station::whereIn('id', $tripStops)->get();
+        $stations = [];
+        foreach($tripStops as $stationId) {
+            $stations[] = Station::where('id', $stationId)->first();
+        }
+        return $stations;
     }
 }
