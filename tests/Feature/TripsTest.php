@@ -63,4 +63,33 @@ class TripsTest extends TestCase
         $response->assertStatus(200);
         $response->assertExactJson([$this->barcelona, $this->valencia, $this->barcelona]);
     }
+
+    public function testUpdateTrip()
+    {
+        $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia)]);
+        $trip = Trip::query()->first();
+        $this->post('/api/trip/' . $trip->alias, ["trip" => array($this->valencia, $this->barcelona)]);
+
+        $this->assertDatabaseHas('trip_stops', [
+            'trip_id' => '1',
+            'station_id' => $this->valencia['id'],
+            'position' => 0
+        ]);
+        $this->assertDatabaseHas('trip_stops', [
+            'trip_id' => '1',
+            'station_id' => $this->barcelona['id'],
+            'position' => 1
+        ]);
+
+        $this->assertDatabaseMissing('trip_stops', [
+            'trip_id' => '1',
+            'station_id' => $this->barcelona['id'],
+            'position' => 0
+        ]);
+        $this->assertDatabaseMissing('trip_stops', [
+            'trip_id' => '1',
+            'station_id' => $this->valencia['id'],
+            'position' => 1
+        ]);
+    }
 }

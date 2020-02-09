@@ -30,4 +30,15 @@ class TripController extends Controller
         }
         return $stations;
     }
+
+    public function update(Request $request, String $alias)
+    {
+        $tripInput = $request->input('trip');
+        $trip = Trip::where('alias', $alias)->first();
+        TripStop::where('trip_id', $trip->id)->delete();
+        foreach($tripInput as $index => $station) {
+            TripStop::create(['trip_id' => $trip->id, 'station_id' => $station["id"], 'position' => $index]);
+        }
+        return 'success';
+    }
 }
