@@ -103,7 +103,7 @@ class StationsTest extends TestCase
         $station = factory(Station::class)->create($data);
         $station->stops()->save(factory(Stop::class)->make([
             'station_id' => $station->station_id,
-            'journey_id' => '123ABC'
+            'journey_id' => 123
         ]));
         return $station;
     }

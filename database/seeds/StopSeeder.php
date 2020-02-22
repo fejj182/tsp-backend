@@ -13,7 +13,7 @@ class StopSeeder extends Seeder
     public function run()
     {
         $googleDrive = new GoogleDrive();
-        $response = $googleDrive->getFile('1UprOdYTUq6Pga0W8UxDAERJ99wMqAZ85');
+        $response = $googleDrive->getFile('1R7B5HjgJ5QIAY3hAVnxt8KZOLh3LQYCm');
         $lines = explode("\n", $response);
 
         foreach($lines as $line) {

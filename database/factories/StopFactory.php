@@ -12,6 +12,6 @@ $factory->define(Stop::class, function (Faker $faker) {
         'arrival_time' => $faker->time(),
         'departure_time' => $faker->time(),
         'stop_sequence' => $faker->randomNumber(3),
-        'journey_id' => Str::random(10),
+        'journey_id' => rand(1,99999),
     ];
 });

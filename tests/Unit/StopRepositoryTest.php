@@ -19,8 +19,8 @@ class StopRepositoryTest extends TestCase
     {
         $stops = new StopRepository();
 
-        $start = $this->createStationWithStop('1', '1-2');
-        $end = $this->createStationWithStop('2', '1-2');
+        $start = $this->createStationWithStop('1', 1);
+        $end = $this->createStationWithStop('2', 1);
         
         $this->assertEquals(Stop::all(), $stops->getStopsToDisplayBetweenStations($start, $end));
     }
@@ -47,15 +47,15 @@ class StopRepositoryTest extends TestCase
     {
         $stops = new StopRepository();
 
-        $start = $this->createStationWithStop('1', '1-2');
-        $end = $this->createStationWithStop('2', '1-2');
+        $start = $this->createStationWithStop('1', 1);
+        $end = $this->createStationWithStop('2', 1);
 
-        $a = $this->createStop($start, '1', '1-2-3');
+        $a = $this->createStop($start, '1', 123);
 
         $middle = factory(Station::class)->create();
-        $b = $this->createStop($middle, '2', '1-2-3');
+        $b = $this->createStop($middle, '2', 123);
 
-        $c = $this->createStop($end, '3', '1-2-3');
+        $c = $this->createStop($end, '3', 123);
 
         $stopsToDisplay = $stops->getStopsToDisplayBetweenStations($start, $end);
 
@@ -69,11 +69,11 @@ class StopRepositoryTest extends TestCase
     {
         $stops = new StopRepository();
 
-        $start = $this->createStationWithStop('3', '2');
-        $a = $this->createStop($start, '1', '1-2');
+        $start = $this->createStationWithStop('3', 2);
+        $a = $this->createStop($start, '1', 1);
 
-        $end = $this->createStationWithStop('4', '3');
-        $b = $this->createStop($end, '2', '1-2');
+        $end = $this->createStationWithStop('4', 3);
+        $b = $this->createStop($end, '2', 1);
 
         $stopsToDisplay = $stops->getStopsToDisplayBetweenStations($start, $end);
 

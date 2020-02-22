@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 /**
  * @property int $id
- * @property string $journey_id
+ * @property int $journey_id
  * @property int $route_id
  */
 class Journey extends Model
