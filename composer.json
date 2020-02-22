@@ -11,7 +11,7 @@
         "php": "^7.2",
         "fideloper/proxy": "^4.0",
         "google/apiclient": "^2.0",
-        "laravel/framework": "^6.2",
+        "laravel/framework": "6.3",
         "laravel/tinker": "^1.0",
         "ramsey/uuid": "^3.9",
         "spatie/laravel-cors": "^1.6"
