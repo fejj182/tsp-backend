@@ -17,7 +17,6 @@ class CreateJourneysTable extends Migration
             $table->bigIncrements('id');
             $table->char('journey_id')->unique();
             $table->char('route_id', 10);
-            $table->char('journey_id_full');
         });
     }
 

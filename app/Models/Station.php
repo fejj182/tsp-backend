@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 /**
- * @property int $id
+ * @property string $id
  * @property string $station_id
  * @property string $name
  * @property string $lat

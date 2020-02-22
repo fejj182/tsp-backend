@@ -13,7 +13,7 @@ class JourneySeeder extends Seeder
     public function run()
     {
         $googleDrive = new GoogleDrive();
-        $response = $googleDrive->getFile('144warjafe9QQnANYH1VUe4uagZ-g24MT');
+        $response = $googleDrive->getFile('1-t3daQ6ccsL-rGz4CBWSlGZRTSBq7LVs');
         $lines = explode("\n", $response);
 
         foreach($lines as $line) {
@@ -21,8 +21,7 @@ class JourneySeeder extends Seeder
                 $row = str_getcsv($line);
                 DB::table('journeys')->insert([
                     'journey_id' => $row[2],
-                    'route_id' => $row[0],
-                    'journey_id_full' => $row[1]
+                    'route_id' => $row[0]
                 ]);
             }
         }

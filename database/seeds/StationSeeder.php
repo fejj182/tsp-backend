@@ -21,7 +21,7 @@ class StationSeeder extends Seeder
              if (strlen($line) > 0) {
                 $row = str_getcsv($line);
                 $enabled = false;
-                $enabledStations = ['71801', '65000', '18000'];
+                $enabledStations = ['66100','78704','12100','75111','22308','04040','60911','71500','13200','22300','22100','21001','10600','54201','05474','70200','14203','06005','54413','10500','31412','05019','60000','51003','51402','65000','71801','18000'];
                 if (in_array($row[0], $enabledStations)){
                     $enabled = true;
                 }
