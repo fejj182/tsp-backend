@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $trip_id
- * @property int $station_id
+ * @property string $station_id
  * @property int $position
  */
 class TripStop extends Model

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 /**
  * @property string $id
- * @property string $station_id
+ * @property int $station_id
  * @property string $name
  * @property string $lat
  * @property string $lng

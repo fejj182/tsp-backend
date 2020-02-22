@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
- * @property string $station_id
+ * @property int $station_id
  * @property string $arrival_time
  * @property string $departure_time
  * @property int $stop_sequence

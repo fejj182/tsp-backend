@@ -16,7 +16,7 @@ class CreateJourneysTable extends Migration
         Schema::create('journeys', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->char('journey_id')->unique();
-            $table->char('route_id', 10);
+            $table->unsignedBigInteger('route_id');
         });
     }
 

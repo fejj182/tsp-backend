@@ -15,7 +15,7 @@ class CreateStopsTable extends Migration
     {
         Schema::create('stops', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->char('station_id', 5);
+            $table->unsignedBigInteger('station_id');
             $table->char('arrival_time', 8);
             $table->char('departure_time', 8);
             $table->smallInteger('stop_sequence');
