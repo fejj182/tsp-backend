@@ -12,10 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            StationSeeder::class,
-            RouteSeeder::class,
-            JourneySeeder::class,
-            StopSeeder::class
+            StationSeeder::class
         ]);
     }
 }

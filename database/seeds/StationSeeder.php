@@ -14,24 +14,20 @@ class StationSeeder extends Seeder
     public function run()
     {
         $googleDrive = new GoogleDrive();
-        $response = $googleDrive->getFile('1m292u-o1Y-9HnOmpxaJkQjtuQO6dqsJo');
+        $response = $googleDrive->getFile('1Mk1YngCGedaeZOGzuF6Yt-gUbpfdRhxe');
         $lines = explode("\n", $response);
 
          foreach($lines as $line) {
              if (strlen($line) > 0) {
-                $row = str_getcsv($line);
-                $enabled = false;
-                $enabledStations = ['66100','78704','12100','75111','22308','04040','60911','71500','13200','22300','22100','21001','10600','54201','05474','70200','14203','06005','54413','10500','31412','05019','60000','51003','51402','65000','71801','18000'];
-                if (in_array($row[0], $enabledStations)){
-                    $enabled = true;
-                }
+                $row = str_getcsv($line, ";");
                 DB::table('stations')->insert([
                     'id' => Uuid::uuid4(),
-                    'station_id' => $row[0],
-                    'name' => $row[2],
-                    'lat' => $row[4],
-                    'lng' => $row[5],
-                    'enabled' => $enabled,
+                    'station_id' => $row[1],
+                    'name' => $row[0],
+                    'lat' => round(floatval($row[2]),6),
+                    'lng' => round(floatval($row[3]),6),
+                    'country' => $row[4],
+                    'enabled' => true,
                 ]);
              }
         }

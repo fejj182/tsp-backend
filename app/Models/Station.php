@@ -11,13 +11,14 @@ use Ramsey\Uuid\Uuid;
  * @property string $lat
  * @property string $lng
  * @property int $enabled
+ * @property string $country
  */
 class Station extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'stations';
-    protected $hidden = ['station_id', 'enabled', 'distance', 'stops'];
+    protected $hidden = ['station_id', 'enabled', 'country', 'distance'];
 
     protected static function boot()
     {

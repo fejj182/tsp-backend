@@ -19,6 +19,7 @@ class CreateStationsTable extends Migration
             $table->char('name');
             $table->double('lat');
             $table->double('lng');
+            $table->char('country');
             $table->boolean('enabled')->default(false);
         });
     }
