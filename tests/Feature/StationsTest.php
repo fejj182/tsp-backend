@@ -50,9 +50,9 @@ class StationsTest extends TestCase
 
     public function testEnabled()
     {
-        $this->createStation($this->barcelona);
-        $this->createStation($this->valencia);
-        $this->createStation($this->disabled);
+        factory(Station::class)->create($this->barcelona);
+        factory(Station::class)->create($this->valencia);
+        factory(Station::class)->create($this->disabled);
 
         $response = $this->get('/api/stations');
 
@@ -61,50 +61,13 @@ class StationsTest extends TestCase
 
     public function testNearest()
     {
-        $this->createStation($this->barcelona);
-        $this->createStation($this->valencia);
-        $this->createStation($this->disabled);
+        factory(Station::class)->create($this->barcelona);
+        factory(Station::class)->create($this->valencia);
+        factory(Station::class)->create($this->disabled);
 
         $response = $this->post('/api/stations/nearest', ["lat" => 41.379520, "lng" => 2.140624]);
         
         $response->assertExactJson($this->barcelona);
         $response->assertStatus(200);
-    }
-
-    public function testConnections()
-    {
-        $barcelona = $this->createStation($this->barcelona);
-        $this->createStation($this->valencia);
-        $this->createStation($this->cuenca);
-
-        $response = $this->post('/api/stations/connections', ["stationId" => $barcelona->id]);
-
-        $expectedResponse = array($this->valencia);
-        $expectedResponse[0]["coords"] = array(
-            [
-                $this->barcelona["lng"], 
-                $this->barcelona["lat"]
-            ],
-            [
-                $this->cuenca["lng"], 
-                $this->cuenca["lat"]
-            ],
-            [
-                $this->valencia["lng"], 
-                $this->valencia["lat"]
-            ]
-        );
-        $response->assertExactJson($expectedResponse);
-        $response->assertStatus(200);
-    }
-
-    private function createStation($data): Station
-    {
-        $station = factory(Station::class)->create($data);
-        $station->stops()->save(factory(Stop::class)->make([
-            'station_id' => $station->station_id,
-            'journey_id' => 123
-        ]));
-        return $station;
     }
 }

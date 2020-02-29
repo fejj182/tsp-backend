@@ -7,12 +7,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class StationRepository
 {
-  protected $stops;
-
-  public function __construct(StopRepository $stops) {
-    $this->stops = $stops;
-  }
-
   public function enabled(): Collection
   {
     return Station::query()
@@ -35,18 +29,5 @@ class StationRepository
     ->where('enabled', 1)
     ->orderBy('distance', 'asc')
     ->first();
-  }
-
-  public function getConnectingStations(Station $station): Collection
-  {
-    $stops = $this->stops->getStopsConnectedToStation($station);
-
-    return $stops
-    ->map(function($stop) {
-      return $stop->station;
-    })
-    ->filter(function($connectingStation) use ($station) {
-      return $connectingStation->enabled && $connectingStation->station_id != $station->station_id;
-    });
   }
 }
