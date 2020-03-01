@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Connection;
 use App\Models\Station;
 use App\Repositories\StationRepository;
 use Illuminate\Http\Request;
@@ -27,5 +28,25 @@ class StationController extends Controller
         $lng = $request->input('lng');
 
         return $this->stations->getNearestStation($lat, $lng);
+    }
+
+    //TODO: Move to repository and unit test to remove disabled stations etc.
+    public function connections(Request $request)
+    {
+        $stationId = $request->input('stationId');
+        $result = collect([]);
+
+        $startingStation = Station::query()->where('id', $stationId)->first();
+        $connections = Connection::query()->where('starting_station', '=', $startingStation->station_id)->get();
+
+        $connections->each(function($connection) use ($result) {
+            $endingStation = Station::query()->where('station_id', '=', $connection->ending_station)->first();
+            if ($endingStation != null) {
+                $endingStation->duration = $connection->duration;
+                $result->push($endingStation);    
+            }
+        });
+
+        return $result;
     }
 }

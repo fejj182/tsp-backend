@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Connection;
 use App\Models\Station;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 class StationsTest extends TestCase
 {
     use RefreshDatabase;
-
+    
     protected function setUp(): void
     {
         parent::setUp();
@@ -41,5 +42,19 @@ class StationsTest extends TestCase
         
         $response->assertExactJson($closeStation->toArray());
         $response->assertStatus(200);
+    }
+
+    public function testConnections()
+    {
+        $startingStation = factory(Station::class)->create();
+        $endingStation = factory(Station::class)->create();
+        $connection = factory(Connection::class)->create(
+            ['starting_station' => $startingStation->station_id, 'ending_station' => $endingStation->station_id]
+        );
+
+        $response = $this->post('/api/stations/connections',  ['stationId' => $startingStation->id]);
+
+        $endingStation->duration = $connection->duration;
+        $response->assertExactJson([$endingStation->toArray()]);
     }
 }
