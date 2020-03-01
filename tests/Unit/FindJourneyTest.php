@@ -2,17 +2,14 @@
 
 use App\Models\Connection;
 use App\Models\Station;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
+use Tests\Concerns\FakeRequests;
 
 class FindJourneyTest extends TestCase 
 {
     use DatabaseMigrations;
+    use FakeRequests;
 
     protected $barcelona;
     protected $valencia;
@@ -20,7 +17,8 @@ class FindJourneyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
+        $this->setUpClient();
+        
         $this->barcelona = [
             'name' => 'Barcelona-Sants',
             'station_id' => 123,
@@ -38,7 +36,9 @@ class FindJourneyTest extends TestCase
 
   public function testConsoleCommand()
   {
-    $this->setUpMockClient();
+    $this->addFakeJsonResponse(['duration' => 60]);
+    $this->addFakeJsonResponse(['duration' => 90]);
+
     factory(Station::class)->create($this->barcelona);
     factory(Station::class)->create($this->valencia);
 
@@ -54,20 +54,4 @@ class FindJourneyTest extends TestCase
   }
 
   //TODO: Test with only enabled stations, repeated calls etc.
-
-  protected function setUpMockClient()
-  {
-    $headers = ['Content-Type' => 'application/json'];
-
-    $container = [];
-    $mock = new MockHandler([
-      new Response(200, $headers, json_encode(['duration' => 60])),
-      new Response(200, $headers, json_encode(['duration' => 90]))
-    ]);
-    
-    $handler = HandlerStack::create($mock);
-    $handler->push(Middleware::history($container));
-
-    $this->app->instance(Client::class, new Client(['handler' => $handler]));
-  }
 }
