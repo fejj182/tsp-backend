@@ -11,62 +11,35 @@ class StationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $barcelona;
-    protected $valencia;
-    protected $disabled;
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->barcelona = [
-            'id' => Uuid::uuid4(),
-            'name' => 'Barcelona-Sants',
-            'lat' => 41.379520,
-            'lng' => 2.140624
-        ];
-        $this->cuenca = [
-            'id' => Uuid::uuid4(),
-            'name' => 'Cuenca',
-            'lat' => 40.06734,
-            'lng' => -2.136471,
-            'enabled' => false
-        ];
-        $this->valencia = [
-            'id' => Uuid::uuid4(),
-            'name' => 'Valencia-Estacio del Nord',
-            'lat' => 39.465064,
-            'lng' => -0.377433
-        ];
-        $this->disabled = [
-            'id' => Uuid::uuid4(),
-            'name' => 'Glasgow',
-            'lat' => 0,
-            'lng' => 0,
-            'enabled' => false
-        ];
     }
 
     public function testEnabled()
     {
-        factory(Station::class)->create($this->barcelona);
-        factory(Station::class)->create($this->valencia);
-        factory(Station::class)->create($this->disabled);
+        $station = factory(Station::class)->create();
+        $anotherStation = factory(Station::class)->create();
+        factory(Station::class)->create(['enabled' => false]);
 
         $response = $this->get('/api/stations');
 
-        $response->assertExactJson([$this->barcelona, $this->valencia]);
+        $response->assertExactJson([$station->toArray(), $anotherStation->toArray()]);
     }
 
     public function testNearest()
     {
-        factory(Station::class)->create($this->barcelona);
-        factory(Station::class)->create($this->valencia);
-        factory(Station::class)->create($this->disabled);
+        $close = ["lat" => 1, "lng" => 1.5];
+        $far = ["lat" => 10, "lng" => 10];
+        $closeDisabled = ["lat" => 1, "lng" => 1, 'enabled' => false];
 
-        $response = $this->post('/api/stations/nearest', ["lat" => 41.379520, "lng" => 2.140624]);
+        $closeStation = factory(Station::class)->create($close);
+        factory(Station::class)->create($far);
+        factory(Station::class)->create($closeDisabled);
+
+        $response = $this->post('/api/stations/nearest', ["lat" => 1, "lng" => 1]);
         
-        $response->assertExactJson($this->barcelona);
+        $response->assertExactJson($closeStation->toArray());
         $response->assertStatus(200);
     }
 }
