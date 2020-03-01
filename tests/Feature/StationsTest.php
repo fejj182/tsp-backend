@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Station;
-use App\Models\Stop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Ramsey\Uuid\Uuid;

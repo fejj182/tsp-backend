@@ -30,9 +30,4 @@ class Station extends Model
             }
         });
     }
-
-    public function stops()
-    {
-        return $this->hasMany('App\Models\Stop', 'station_id', 'station_id');
-    }
 }
