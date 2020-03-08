@@ -16,7 +16,7 @@ class ConnectionFinder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:find {country} {--days=7}';
+    protected $signature = 'connections:find {country} {--days=7} {--sleep=0}';
 
     /**
      * The console command description.
@@ -61,6 +61,7 @@ class ConnectionFinder extends Command
                     ->get();
                 $connections->each(function ($connection) {
                     $this->updateConnection($connection);
+                    sleep($this->option('sleep'));
                 });
             });
             $this->info('Finished');
