@@ -34,6 +34,12 @@ class ConnectionFinder extends Command
     {
         parent::__construct();
         $this->client = $client;
+
+        $this->durationNotExpired = function ($query) {
+            $days = $this->option('days');
+            $query->where('updated_at', '<', Carbon::now()->subDays($days))
+                ->orWhereNull('duration');
+        };
     }
 
     /**
@@ -46,18 +52,14 @@ class ConnectionFinder extends Command
         $country = $this->argument('country');
 
         $stations = Station::query()->where('country', '=', $country)->get();
-
+        
         try {
-            $stations->each(function($station) {
+            $stations->each(function ($station){
                 $connections = Connection::query()
-                ->where('starting_station', '=', $station->station_id)
-                ->where(function ($query) {
-                    $days = $this->option('days');
-                    $query->where('updated_at', '<', Carbon::now()->subDays($days))
-                          ->orWhereNull('duration');
-                })
-                ->get();
-                $connections->each(function($connection) {
+                    ->where('starting_station', '=', $station->station_id)
+                    ->where($this->durationNotExpired)
+                    ->get();
+                $connections->each(function ($connection) {
                     $this->updateConnection($connection);
                 });
             });
