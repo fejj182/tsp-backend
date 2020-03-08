@@ -23,7 +23,8 @@ return [
             'https://afternoon-citadel-44487.herokuapp.com',
             'https://compassionate-kalam-c86cc7.netlify.com',
             'https://trainspotter.co',
-            '*'
+            'http://localhost:8080'
+            //TODO: is this a security problem?
         ],
 
         'allow_methods' => [
