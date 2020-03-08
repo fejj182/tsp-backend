@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Connection;
 use App\Models\Station;
+use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
@@ -15,7 +16,7 @@ class ConnectionFinder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:find {country}';
+    protected $signature = 'connections:find {country} {--days=}';
 
     /**
      * The console command description.
@@ -48,7 +49,14 @@ class ConnectionFinder extends Command
 
         try {
             $stations->each(function($station) {
-                $connections = Connection::query()->where('starting_station', '=', $station->station_id)->get();
+                $connections = Connection::query()
+                ->where('starting_station', '=', $station->station_id)
+                ->where(function ($query) {
+                    $days = $this->option('days');
+                    $query->where('updated_at', '<', Carbon::now()->subDays($days))
+                          ->orWhereNull('duration');
+                })
+                ->get();
                 $connections->each(function($connection) {
                     $this->updateConnection($connection);
                 });
