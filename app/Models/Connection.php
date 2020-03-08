@@ -11,5 +11,5 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Connection extends Model
 {
-    //
+    protected $fillable = ['starting_station', 'ending_station', 'duration'];
 }

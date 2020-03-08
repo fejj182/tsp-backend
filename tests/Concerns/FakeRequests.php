@@ -32,4 +32,9 @@ Trait FakeRequests
 
     $this->mockHandler->append(new Response($status, $headers, $body));
   }
+
+  protected function addErrorResponse()
+  {
+    $this->mockHandler->append(new Response(500, [], null));
+  }
 }

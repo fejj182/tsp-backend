@@ -43,7 +43,7 @@ class FindJourneyTest extends TestCase
     factory(Station::class)->create($this->valencia);
 
     $this->artisan('journey:find ES')
-          ->expectsOutput('Finished!')
+          ->expectsOutput('Finished')
           ->assertExitCode(0);
       
     $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
@@ -53,5 +53,18 @@ class FindJourneyTest extends TestCase
     $this->assertEquals(90, $valenciaToBarcelona->duration);
   }
 
-  //TODO: Test with only enabled stations, repeated calls etc.
+  public function testShouldFailIfDoesNotReturn200()
+  {
+    $this->addErrorResponse();
+    $this->addFakeJsonResponse(['duration' => 90]);
+
+    factory(Station::class)->create($this->barcelona);
+    factory(Station::class)->create($this->valencia);
+
+    $this->artisan('journey:find ES')
+          ->expectsOutput('Failed')
+          ->assertExitCode(0);
+
+    $this->assertEmpty(Connection::query()->first());
+  }
 }
