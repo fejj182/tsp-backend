@@ -3,6 +3,7 @@
 use App\Models\Connection;
 use App\Models\Station;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class ConnectionBuilderTest extends TestCase
@@ -12,6 +13,8 @@ class ConnectionBuilderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Log::spy();
 
         $this->barcelona = [
             'name' => 'Barcelona-Sants',
