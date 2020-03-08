@@ -16,7 +16,7 @@ class ConnectionFinder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:find {country} {--days=}';
+    protected $signature = 'connections:find {country} {--days=7}';
 
     /**
      * The console command description.
@@ -73,7 +73,13 @@ class ConnectionFinder extends Command
     {
         $url = 'http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station;
         $res = $this->client->request('GET', $url);
-        $duration = json_decode($res->getBody())->duration;
+        $body = json_decode($res->getBody());
+
+        if (!empty($body)) {
+            $duration = $body->duration;
+        } else {
+            $duration = 0;
+        }
 
         $connection->duration = $duration;
         $connection->save();

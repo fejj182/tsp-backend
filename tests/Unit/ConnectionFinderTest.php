@@ -100,4 +100,20 @@ class ConnectionFinderTest extends TestCase
         $this->assertEquals(60, $barcelonaToValencia->duration);
         $this->assertEquals(90, $valenciaToBarcelona->duration);
     }
+
+    public function testShouldNotBreakIfNoDurationReturned()
+    {
+        $this->addFakeJsonResponse([]);
+        $this->addFakeJsonResponse(['duration' => 90]);
+
+        $this->artisan('connections:find ES --days=1')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
+
+        $this->assertSame(0, $barcelonaToValencia->duration);
+        $this->assertEquals(90, $valenciaToBarcelona->duration);
+    }
 }
