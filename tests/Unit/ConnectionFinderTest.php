@@ -6,19 +6,21 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Concerns\FakeRequests;
 
-class ConnectionFinderTest extends TestCase 
+class ConnectionFinderTest extends TestCase
 {
     use DatabaseMigrations;
     use FakeRequests;
 
     protected $barcelona;
     protected $valencia;
+    protected $barcelonaToValencia;
+    protected $valenciaToBarcelona;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->setUpClient();
-        
+
         $this->barcelona = [
             'name' => 'Barcelona-Sants',
             'station_id' => 123,
@@ -29,42 +31,55 @@ class ConnectionFinderTest extends TestCase
             'station_id' => 456,
             'country' => 'ES'
         ];
-        $this->disabled = [
-          'enabled' => false
+        $this->barcelonaToValencia = [
+            'starting_station' => 123,
+            'ending_station' => 456,
+        ];
+        $this->valenciaToBarcelona = [
+            'starting_station' => 456,
+            'ending_station' => 123,
         ];
     }
 
-  public function testConsoleCommand()
-  {
-    $this->addFakeJsonResponse(['duration' => 60]);
-    $this->addFakeJsonResponse(['duration' => 90]);
+    public function testConnectionFinderConsoleCommand()
+    {
+        $this->addFakeJsonResponse(['duration' => 60]);
+        $this->addFakeJsonResponse(['duration' => 90]);
 
-    factory(Station::class)->create($this->barcelona);
-    factory(Station::class)->create($this->valencia);
+        factory(Station::class)->create($this->barcelona);
+        factory(Station::class)->create($this->valencia);
+        factory(Connection::class)->create($this->barcelonaToValencia);
+        factory(Connection::class)->create($this->valenciaToBarcelona);
 
-    $this->artisan('connections:find ES')
-          ->expectsOutput('Finished')
-          ->assertExitCode(0);
-      
-    $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
-    $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
+        $this->artisan('connections:find ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
 
-    $this->assertEquals(60, $barcelonaToValencia->duration);
-    $this->assertEquals(90, $valenciaToBarcelona->duration);
-  }
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
 
-  public function testShouldFailIfDoesNotReturn200()
-  {
-    $this->addErrorResponse();
-    $this->addFakeJsonResponse(['duration' => 90]);
+        $this->assertEquals(60, $barcelonaToValencia->duration);
+        $this->assertEquals(90, $valenciaToBarcelona->duration);
+    }
 
-    factory(Station::class)->create($this->barcelona);
-    factory(Station::class)->create($this->valencia);
+    public function testShouldFailIfDoesNotReturn200()
+    {
+        $this->addErrorResponse();
+        $this->addFakeJsonResponse(['duration' => 90]);
 
-    $this->artisan('connections:find ES')
-          ->expectsOutput('Failed')
-          ->assertExitCode(0);
+        factory(Station::class)->create($this->barcelona);
+        factory(Station::class)->create($this->valencia);
+        factory(Connection::class)->create($this->barcelonaToValencia);
+        factory(Connection::class)->create($this->valenciaToBarcelona);
 
-    $this->assertEmpty(Connection::query()->first());
-  }
+        $this->artisan('connections:find ES')
+            ->expectsOutput('Failed')
+            ->assertExitCode(0);
+
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
+
+        $this->assertNull($barcelonaToValencia->duration);
+        $this->assertNull($valenciaToBarcelona->duration);
+    }
 }

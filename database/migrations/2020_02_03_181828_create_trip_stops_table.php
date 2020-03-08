@@ -14,6 +14,7 @@ class CreateTripStopsTable extends Migration
     public function up()
     {
         Schema::create('trip_stops', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('trip_id');
             $table->uuid('station_id');
             $table->smallInteger('position');

@@ -47,33 +47,25 @@ class ConnectionFinder extends Command
         $stations = Station::query()->where('country', '=', $country)->get();
 
         try {
-            $stations->each(function($startingStation) use ($stations) {
-                $stations->each(function($endingStation) use ($startingStation) {
-                    if ($startingStation != $endingStation) {
-                        $this->createConnection($startingStation, $endingStation);
-                    }
+            $stations->each(function($station) {
+                $connections = Connection::query()->where('starting_station', '=', $station->station_id)->get();
+                $connections->each(function($connection) {
+                    $this->updateConnection($connection);
                 });
             });
             $this->info('Finished');
         } catch (Exception $e) {
-            //TODO: where did it fail
             $this->info('Failed');
         }
     }
 
-    protected function createConnection($startingStation, $endingStation)
+    protected function updateConnection($connection)
     {
-        $url = 'http://localhost:3000/journeys/' . $startingStation->station_id . '/' . $endingStation->station_id;
-
+        $url = 'http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station;
         $res = $this->client->request('GET', $url);
-
         $duration = json_decode($res->getBody())->duration;
 
-        //TODO: check entry exists and if exists, update instead of create
-        Connection::create([
-            'starting_station' => $startingStation->station_id,
-            'ending_station' => $endingStation->station_id,
-            'duration' => $duration
-        ]);
+        $connection->duration = $duration;
+        $connection->save();
     }
 }

@@ -14,11 +14,12 @@ class CreateConnectionsTable extends Migration
     public function up()
     {
         Schema::create('connections', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('starting_station');
             $table->unsignedBigInteger('ending_station');
             $table->integer('duration')->nullable();
             $table->timestamps();
-            $table->primary(['starting_station', 'ending_station']);
+            $table->unique(['starting_station', 'ending_station']);
         });
     }
 
