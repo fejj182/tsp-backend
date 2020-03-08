@@ -8,14 +8,14 @@ use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 
-class FindJourney extends Command
+class ConnectionFinder extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'journey:find {country}';
+    protected $signature = 'connections:find {country}';
 
     /**
      * The console command description.
@@ -55,7 +55,7 @@ class FindJourney extends Command
                 });
             });
             $this->info('Finished');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //TODO: where did it fail
             $this->info('Failed');
         }

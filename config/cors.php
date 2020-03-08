@@ -23,6 +23,7 @@ return [
             'https://afternoon-citadel-44487.herokuapp.com',
             'https://compassionate-kalam-c86cc7.netlify.com',
             'https://trainspotter.co',
+            '*'
         ],
 
         'allow_methods' => [

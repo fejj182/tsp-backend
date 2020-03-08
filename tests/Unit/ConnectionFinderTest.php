@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Concerns\FakeRequests;
 
-class FindJourneyTest extends TestCase 
+class ConnectionFinderTest extends TestCase 
 {
     use DatabaseMigrations;
     use FakeRequests;
@@ -42,7 +42,7 @@ class FindJourneyTest extends TestCase
     factory(Station::class)->create($this->barcelona);
     factory(Station::class)->create($this->valencia);
 
-    $this->artisan('journey:find ES')
+    $this->artisan('connections:find ES')
           ->expectsOutput('Finished')
           ->assertExitCode(0);
       
@@ -61,7 +61,7 @@ class FindJourneyTest extends TestCase
     factory(Station::class)->create($this->barcelona);
     factory(Station::class)->create($this->valencia);
 
-    $this->artisan('journey:find ES')
+    $this->artisan('connections:find ES')
           ->expectsOutput('Failed')
           ->assertExitCode(0);
 
