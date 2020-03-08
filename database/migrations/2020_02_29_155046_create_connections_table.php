@@ -16,7 +16,7 @@ class CreateConnectionsTable extends Migration
         Schema::create('connections', function (Blueprint $table) {
             $table->unsignedBigInteger('starting_station');
             $table->unsignedBigInteger('ending_station');
-            $table->integer('duration');
+            $table->integer('duration')->nullable();
             $table->timestamps();
             $table->primary(['starting_station', 'ending_station']);
         });
