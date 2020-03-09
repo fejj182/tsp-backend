@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Log;
 
 class ConnectionFinder extends Command
 {
@@ -61,7 +62,7 @@ class ConnectionFinder extends Command
                     ->get();
                 $connections->each(function ($connection) {
                     $this->updateConnection($connection);
-                    sleep($this->option('sleep'));
+                    usleep($this->option('sleep') * 1000 * 1000);
                 });
             });
             $this->info('Finished');
@@ -76,13 +77,10 @@ class ConnectionFinder extends Command
         $res = $this->client->request('GET', $url);
         $body = json_decode($res->getBody());
 
-        if (!empty($body)) {
-            $duration = $body->duration;
-        } else {
-            $duration = 0;
-        }
+        $duration = $body->duration;
 
         $connection->duration = $duration;
         $connection->save();
+        Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
     }
 }
