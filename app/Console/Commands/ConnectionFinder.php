@@ -53,9 +53,9 @@ class ConnectionFinder extends Command
         $country = $this->argument('country');
 
         $stations = Station::query()->where('country', '=', $country)->get();
-        
+
         try {
-            $stations->each(function ($station){
+            $stations->each(function ($station) {
                 $connections = Connection::query()
                     ->where('starting_station', '=', $station->station_id)
                     ->where($this->durationNotExpired)
@@ -78,9 +78,13 @@ class ConnectionFinder extends Command
         $body = json_decode($res->getBody());
 
         $duration = $body->duration;
-
         $connection->duration = $duration;
         $connection->save();
-        Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
+
+        if ($duration > 0) {
+            Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
+        } else {
+            Log::info("Connection not found: " . $connection->starting_station . "-" . $connection->ending_station);
+        }
     }
 }
