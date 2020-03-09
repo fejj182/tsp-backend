@@ -6,12 +6,11 @@ use App\Models\Connection;
 use App\Models\Station;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Ramsey\Uuid\Uuid;
 
 class StationsTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,7 +38,7 @@ class StationsTest extends TestCase
         factory(Station::class)->create($closeDisabled);
 
         $response = $this->post('/api/stations/nearest', ["lat" => 1, "lng" => 1]);
-        
+
         $response->assertExactJson($closeStation->toArray());
         $response->assertStatus(200);
     }
@@ -48,13 +47,17 @@ class StationsTest extends TestCase
     {
         $startingStation = factory(Station::class)->create();
         $endingStation = factory(Station::class)->create();
-        $connection = factory(Connection::class)->create(
-            ['starting_station' => $startingStation->station_id, 'ending_station' => $endingStation->station_id]
-        );
+        $connection = factory(Connection::class)->create([
+            'starting_station' => $startingStation->station_id,
+            'ending_station' => $endingStation->station_id,
+            'duration' => 123
+        ]);
 
         $response = $this->post('/api/stations/connections',  ['stationId' => $startingStation->id]);
 
-        $endingStation->duration = $connection->duration;
-        $response->assertExactJson([$endingStation->toArray()]);
+        $result = $endingStation->toArray();
+        $result["duration"] = $connection->duration;
+
+        $response->assertExactJson([$result]);
     }
 }

@@ -13,7 +13,8 @@ class StationController extends Controller
 {
     protected $stations;
 
-    public function __construct(StationRepository $stations) {
+    public function __construct(StationRepository $stations)
+    {
         $this->stations = $stations;
     }
 
@@ -37,13 +38,16 @@ class StationController extends Controller
         $result = collect([]);
 
         $startingStation = Station::query()->where('id', $stationId)->first();
-        $connections = Connection::query()->where('starting_station', '=', $startingStation->station_id)->get();
+        $connections = Connection::query()
+            ->where('starting_station', '=', $startingStation->station_id)
+            ->where('duration', '>', 0)
+            ->get();
 
-        $connections->each(function($connection) use ($result) {
+        $connections->each(function ($connection) use ($result) {
             $endingStation = Station::query()->where('station_id', '=', $connection->ending_station)->first();
             if ($endingStation != null) {
                 $endingStation->duration = $connection->duration;
-                $result->push($endingStation);    
+                $result->push($endingStation);
             }
         });
 
