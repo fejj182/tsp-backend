@@ -14,3 +14,4 @@ _ide_helper*
 database/seeds/data/*
 *.sql
 .phpstorm.meta.php
+.idea
