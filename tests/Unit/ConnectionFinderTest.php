@@ -47,10 +47,49 @@ class ConnectionFinderTest extends TestCase
         factory(Connection::class)->create($this->valenciaToBarcelona);
     }
 
-    public function testConnectionFinderConsoleCommand()
+    public function testFinderCommand()
     {
         $this->addFakeJsonResponse(['duration' => 60]);
         $this->addFakeJsonResponse(['duration' => 90]);
+
+        $this->artisan('connections:find ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
+
+        $this->assertEquals(60, $barcelonaToValencia->duration);
+        $this->assertEquals(90, $valenciaToBarcelona->duration);
+    }
+
+    public function testFinderCommandShouldFailedResponse()
+    {
+        $this->addErrorResponse();
+        $this->addFakeJsonResponse(['duration' => 90]);
+
+        $this->artisan('connections:find ES')
+            ->expectsOutput('Failed')
+            ->assertExitCode(0);
+
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
+
+        $this->assertNull($barcelonaToValencia->duration);
+        $this->assertNull($valenciaToBarcelona->duration);
+    }
+
+    public function testFinderCommandShouldNotCallApiIfDurationHasNotExpired()
+    {
+        $this->addFakeJsonResponse(['duration' => 60]);
+        $this->addFakeJsonResponse(['duration' => 90]);
+
+        $this->artisan('connections:find ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $this->addFakeJsonResponse(['duration' => 120]);
+        $this->addFakeJsonResponse(['duration' => 150]);
 
         $this->artisan('connections:find ES --days=1')
             ->expectsOutput('Finished')
@@ -63,28 +102,12 @@ class ConnectionFinderTest extends TestCase
         $this->assertEquals(90, $valenciaToBarcelona->duration);
     }
 
-    public function testShouldFailIfDoesNotReturn200()
-    {
-        $this->addErrorResponse();
-        $this->addFakeJsonResponse(['duration' => 90]);
-
-        $this->artisan('connections:find ES --days=1')
-            ->expectsOutput('Failed')
-            ->assertExitCode(0);
-
-        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
-        $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
-
-        $this->assertNull($barcelonaToValencia->duration);
-        $this->assertNull($valenciaToBarcelona->duration);
-    }
-
-    public function testShouldCallApiOnlyIfDurationIsOld()
+    public function testFinderCommandShouldCallApiIfDurationIsHasExpired()
     {
         $this->addFakeJsonResponse(['duration' => 60]);
         $this->addFakeJsonResponse(['duration' => 90]);
 
-        $this->artisan('connections:find ES --days=1')
+        $this->artisan('connections:find ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
@@ -98,7 +121,9 @@ class ConnectionFinderTest extends TestCase
         $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
         $valenciaToBarcelona = Connection::query()->where('starting_station', '=', $this->valencia['station_id'])->first();
 
-        $this->assertEquals(60, $barcelonaToValencia->duration);
-        $this->assertEquals(90, $valenciaToBarcelona->duration);
+        $this->assertEquals(120, $barcelonaToValencia->duration);
+        $this->assertEquals(150, $valenciaToBarcelona->duration);
     }
+    
+    // TODO: Test logs
 }
