@@ -4,10 +4,11 @@ namespace App\Console\Commands;
 
 use App\Models\Connection;
 use App\Models\Station;
+use App\Helpers\CountryCodes;
 use Carbon\Carbon;
-use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Exception;
 use Log;
 
 class ConnectionCapture extends Command
@@ -46,7 +47,10 @@ class ConnectionCapture extends Command
     {
         $country = $this->argument('country');
 
-        $stations = Station::query()->where('country', '=', $country)->get();
+        $stations = Station::query()->where([
+            ['country', '=', $country],
+            ['important', '=', true]
+        ])->get();
 
         try {
             $stations->each(function ($station) {
@@ -59,8 +63,14 @@ class ConnectionCapture extends Command
                     ])
                     ->get();
                 $connections->each(function ($connection) {
-                    $this->updateConnection($connection);
-                    usleep($this->option('sleep') * 1000 * 1000);
+                    $endingStation = Station::query()->where([
+                        ['station_id', '=', $connection->ending_station],
+                        ['important', '=', true]
+                    ])->first();
+                    if (!empty($endingStation)) {
+                        $this->updateConnection($connection);
+                        usleep($this->option('sleep') * 1000 * 1000);
+                    }
                 });
             });
             $this->info('Finished');
@@ -87,15 +97,19 @@ class ConnectionCapture extends Command
     protected function captureJoiningStation($firstLeg)
     {
         $capture = $firstLeg->destination;
+
+        preg_match_all('/\([A-Za-z]+\)/', $capture->name, $matches);
+        $country = str_replace(['(', ')'], '', end($matches[0]));
+        $countryCode = CountryCodes::countryCodeLookup($country);
+
         Station::firstOrCreate([
             'name' => $capture->name,
             'station_id' => $capture->id,
-            'country' => '',
+            'country' => $countryCode,
             'lat' => $capture->location->latitude,
             'lng' => $capture->location->longitude,
+            'captured' => true
         ]);
-
-        //TODO: Get country code and set captured=true
     }
 
     protected function saveConnection($leg)

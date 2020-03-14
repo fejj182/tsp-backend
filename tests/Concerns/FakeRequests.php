@@ -8,33 +8,40 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 
-Trait FakeRequests
+trait FakeRequests
 {
-  protected function setUpClient()
-  {
-    $container = [];
-    $this->mockHandler = new MockHandler();
-    
-    $handler = HandlerStack::create($this->mockHandler);
-    $handler->push(Middleware::history($container));
+    protected $history;
 
-    $this->app->instance(Client::class, new Client(['handler' => $handler]));
-  }
+    protected function setUpClient()
+    {
+        $this->history = [];
+        $this->mockHandler = new MockHandler();
 
-  protected function addFakeJsonResponse(
-    $body = null,
-    $status = 200, 
-    array $headers = ['Content-Type' => 'application/json']
-  ) {
-    if (!is_null($body) && !is_string($body)) {
-      $body = json_encode($body);
+        $handler = HandlerStack::create($this->mockHandler);
+        $handler->push(Middleware::history($this->history));
+
+        $this->app->instance(Client::class, new Client(['handler' => $handler]));
     }
 
-    $this->mockHandler->append(new Response($status, $headers, $body));
-  }
+    protected function addFakeJsonResponse(
+        $body = null,
+        $status = 200,
+        array $headers = ['Content-Type' => 'application/json']
+    ) {
+        if (!is_null($body) && !is_string($body)) {
+            $body = json_encode($body);
+        }
 
-  protected function addErrorResponse()
-  {
-    $this->mockHandler->append(new Response(500, [], null));
-  }
+        $this->mockHandler->append(new Response($status, $headers, $body));
+    }
+
+    protected function addErrorResponse()
+    {
+        $this->mockHandler->append(new Response(500, [], null));
+    }
+
+    protected function assertGuzzleNotCalled()
+    {
+        $this->assertTrue(count($this->history) === 0, 'Guzzle was called ' . count($this->history) . ' times.');
+    }
 }

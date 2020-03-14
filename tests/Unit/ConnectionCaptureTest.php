@@ -27,7 +27,7 @@ class ConnectionCaptureTest extends TestCase
 
         $this->start = [
             'id' => 123,
-            'name' => 'BARCELONA-SANTS (Spain)',
+            'name' => 'VALENCIA (Spain)',
             'location' => [
                 "longitude" => 1,
                 "latitude" => 1
@@ -35,7 +35,7 @@ class ConnectionCaptureTest extends TestCase
         ];
         $this->middle = [
             'id' => 456,
-            'name' => 'PARIS GARE DE LYON (France)',
+            'name' => 'BARCELONA (Spain)',
             'location' => [
                 "longitude" => 2,
                 "latitude" => 2
@@ -93,20 +93,6 @@ class ConnectionCaptureTest extends TestCase
         ]);
     }
 
-    protected function setUEndnImportantStations()
-    {
-        factory(Station::class)->create([
-            'station_id' => 123,
-            'country' => 'ES',
-            'important' => false
-        ]);
-        factory(Station::class)->create([
-            'station_id' => 789,
-            'country' => 'ES',
-            'important' => false
-        ]);
-    }
-
     protected function setUpStationsInDifferentCountries()
     {
         factory(Station::class)->create([
@@ -118,6 +104,20 @@ class ConnectionCaptureTest extends TestCase
             'station_id' => 789,
             'country' => 'FR',
             'important' => true
+        ]);
+    }
+
+    protected function setUpNotImportantStations()
+    {
+        factory(Station::class)->create([
+            'station_id' => 123,
+            'country' => 'ES',
+            'important' => false
+        ]);
+        factory(Station::class)->create([
+            'station_id' => 789,
+            'country' => 'ES',
+            'important' => false
         ]);
     }
 
@@ -193,6 +193,9 @@ class ConnectionCaptureTest extends TestCase
         $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
 
         $this->assertNotEmpty($captured);
+        $this->assertEquals('ES', $captured->country);
+        $this->assertEquals(true, $captured->captured);
+        $this->assertEquals(false, $captured->important);
         $this->assertEquals(360, $startToMiddle->duration);
         $this->assertEquals(90, $middleToEnd->duration);
         $this->assertEquals(60, $endToMiddle->duration);
@@ -268,6 +271,18 @@ class ConnectionCaptureTest extends TestCase
         $this->assertEmpty($captured);
     }
 
+    public function testCaptureCommandShouldNotTryAndCallApiForNotImportantStations()
+    {
+        $this->setUpNotImportantStations();
+        $this->setUpConnections();
+
+        $this->artisan('connections:capture ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $this->assertGuzzleNotCalled();
+    }
+
     public function testCaptureCommandShouldNotCallApiIfDurationHasNotExpired()
     {
         $this->setUpStations();
@@ -280,4 +295,6 @@ class ConnectionCaptureTest extends TestCase
 
         $this->assertEmpty($captured);
     }
+
+    //TODO: Add guzzle calledXtimes asserts and test logs
 }
