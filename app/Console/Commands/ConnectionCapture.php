@@ -52,7 +52,18 @@ class ConnectionCapture extends Command
         try {
             $connections = $this->getConnectionsToCapture();
             $connections->each(function ($connection) {
-                $this->updateConnection($connection);
+                $journey = $this->get('http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture");
+
+                if (!empty($journey)) {
+                    $captured = $this->captureJoiningStation($journey);
+                    Log::info(
+                        $captured->name . "(" . $captured->station_id . ") captured from " . 
+                        $connection->starting_station . "-" . $connection->ending_station
+                    );
+                } else {
+                    Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
+                }
+
                 usleep($this->option('sleep') * 1000 * 1000);
             });
             $this->info('Finished');
@@ -64,43 +75,33 @@ class ConnectionCapture extends Command
     protected function getConnectionsToCapture(): Collection
     {
         return Connection::query()
-        ->join('stations as s1', function ($join) {
-            $join->on('connections.starting_station', '=', 's1.station_id')
-                ->where([
-                    ['s1.important', '=', true],
-                    ['s1.country', '=', $this->argument('country')]
-                ]);
-        })
-        ->join('stations as s2', function ($join2) {
-            $join2->on('connections.ending_station', '=', 's2.station_id')
-                ->where('s2.important', '=', true);
-        })
-        ->where([
-            ['duration', '=', 0],
-            ['updated_at', '<=', Carbon::now()->subDays($this->option('days'))]
-        ])
-        ->get();
+            ->join('stations as s1', function ($join) {
+                $join->on('connections.starting_station', '=', 's1.station_id')
+                    ->where([
+                        ['s1.important', '=', true],
+                        ['s1.country', '=', $this->argument('country')]
+                    ]);
+            })
+            ->join('stations as s2', function ($join2) {
+                $join2->on('connections.ending_station', '=', 's2.station_id')
+                    ->where('s2.important', '=', true);
+            })
+            ->where([
+                ['duration', '=', 0],
+                ['updated_at', '<=', Carbon::now()->subDays($this->option('days'))]
+            ])
+            ->get();
     }
 
-    protected function updateConnection($connection)
+    protected function captureJoiningStation($journey)
     {
-        $journey = $this->get('http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture");
-
-        if (count($journey) == 2) {
-            $this->captureJoiningStation($journey[0]);
-            $this->saveConnection($journey[0]);
-            $this->saveConnection($journey[1]);
-        } else {
-            Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
-        }
-    }
-
-    protected function captureJoiningStation($firstLeg)
-    {
-        $capture = $firstLeg->destination;
+        $capture = $journey->firstLeg->destination;
         $countryCode = CountryCodes::countryCodeLookup($capture->name);
 
-        Station::firstOrCreate([
+        $this->saveConnection($journey->firstLeg);
+        $this->saveConnection($journey->secondLeg);
+
+        return Station::firstOrCreate([
             'name' => $capture->name,
             'station_id' => $capture->id,
             'country' => $countryCode,
@@ -113,11 +114,10 @@ class ConnectionCapture extends Command
     protected function saveConnection($leg)
     {
         $duration = Carbon::parse($leg->arrival)->diffInMinutes(Carbon::parse($leg->departure));
-        $connection = Connection::firstOrCreate([
+        return Connection::firstOrCreate([
             'starting_station' => $leg->origin->id,
             'ending_station' => $leg->destination->id,
             'duration' => $duration
         ]);
-        Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
     }
 }

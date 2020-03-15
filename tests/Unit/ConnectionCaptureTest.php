@@ -166,8 +166,8 @@ class ConnectionCaptureTest extends TestCase
         $this->setUpStations();
         $this->setUpConnections();
 
-        $this->addFakeJsonResponse([$this->leg1, $this->leg2]);
-        $this->addFakeJsonResponse([$this->leg3, $this->leg4]);
+        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
+        $this->addFakeJsonResponse(["firstLeg" => $this->leg3, "secondLeg" => $this->leg4]);
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
@@ -207,7 +207,7 @@ class ConnectionCaptureTest extends TestCase
         $this->setUpStationsInDifferentCountries();
         $this->setUpConnections();
 
-        $this->addFakeJsonResponse([$this->leg1, $this->leg2]);
+        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
@@ -243,8 +243,8 @@ class ConnectionCaptureTest extends TestCase
         $this->setUpStations();
         $this->setUpConnectionsWithDurations();
 
-        $this->addFakeJsonResponse([$this->leg1, $this->leg2]);
-        $this->addFakeJsonResponse([$this->leg3, $this->leg4]);
+        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
+        $this->addFakeJsonResponse(["firstLeg" => $this->leg3, "secondLeg" => $this->leg4]);
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
