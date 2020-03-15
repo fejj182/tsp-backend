@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Aliases\AliasGenerator;
+use App\Services\Aliases\AliasGenerator;
 use Illuminate\Database\Eloquent\Model;
 
 /**

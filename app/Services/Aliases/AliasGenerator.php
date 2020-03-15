@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aliases;
+namespace App\Services\Aliases;
 
 use SplFileObject;
 

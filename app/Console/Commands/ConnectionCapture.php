@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Connection;
 use App\Models\Station;
-use App\Helpers\CountryCodes;
+use App\Services\CountryCodes;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
