@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Connection;
 use App\Models\Station;
 use App\Services\CountryCodes;
+use App\Http\MakesHttpRequests;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
@@ -14,6 +15,8 @@ use Log;
 
 class ConnectionCapture extends Command
 {
+    use MakesHttpRequests;
+
     /**
      * The name and signature of the console command.
      *
@@ -81,14 +84,12 @@ class ConnectionCapture extends Command
 
     protected function updateConnection($connection)
     {
-        $url = 'http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture";
-        $res = $this->client->request('GET', $url);
-        $legs = json_decode($res->getBody());
+        $journey = $this->get('http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture");
 
-        if (count($legs) == 2) {
-            $this->captureJoiningStation($legs[0]);
-            $this->saveConnection($legs[0]);
-            $this->saveConnection($legs[1]);
+        if (count($journey) == 2) {
+            $this->captureJoiningStation($journey[0]);
+            $this->saveConnection($journey[0]);
+            $this->saveConnection($journey[1]);
         } else {
             Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
         }
