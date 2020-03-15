@@ -8,6 +8,7 @@ use App\Helpers\CountryCodes;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Exception;
 use Log;
 
@@ -45,38 +46,37 @@ class ConnectionCapture extends Command
      */
     public function handle()
     {
-        $country = $this->argument('country');
-
-        $stations = Station::query()->where([
-            ['country', '=', $country],
-            ['important', '=', true]
-        ])->get();
-
         try {
-            $stations->each(function ($station) {
-                $days = $this->option('days');
-                $connections = Connection::query()
-                    ->where([
-                        ['starting_station', '=', $station->station_id],
-                        ['duration', '=', 0],
-                        ['updated_at', '<=', Carbon::now()->subDays($days)]
-                    ])
-                    ->get();
-                $connections->each(function ($connection) {
-                    $endingStation = Station::query()->where([
-                        ['station_id', '=', $connection->ending_station],
-                        ['important', '=', true]
-                    ])->first();
-                    if (!empty($endingStation)) {
-                        $this->updateConnection($connection);
-                        usleep($this->option('sleep') * 1000 * 1000);
-                    }
-                });
+            $connections = $this->getConnectionsToCapture();
+            $connections->each(function ($connection) {
+                $this->updateConnection($connection);
+                usleep($this->option('sleep') * 1000 * 1000);
             });
             $this->info('Finished');
         } catch (Exception $e) {
             $this->info('Failed');
         }
+    }
+
+    protected function getConnectionsToCapture(): Collection
+    {
+        return Connection::query()
+        ->join('stations as s1', function ($join) {
+            $join->on('connections.starting_station', '=', 's1.station_id')
+                ->where([
+                    ['s1.important', '=', true],
+                    ['s1.country', '=', $this->argument('country')]
+                ]);
+        })
+        ->join('stations as s2', function ($join2) {
+            $join2->on('connections.ending_station', '=', 's2.station_id')
+                ->where('s2.important', '=', true);
+        })
+        ->where([
+            ['duration', '=', 0],
+            ['updated_at', '<=', Carbon::now()->subDays($this->option('days'))]
+        ])
+        ->get();
     }
 
     protected function updateConnection($connection)
@@ -97,10 +97,7 @@ class ConnectionCapture extends Command
     protected function captureJoiningStation($firstLeg)
     {
         $capture = $firstLeg->destination;
-
-        preg_match_all('/\([A-Za-z]+\)/', $capture->name, $matches);
-        $country = str_replace(['(', ')'], '', end($matches[0]));
-        $countryCode = CountryCodes::countryCodeLookup($country);
+        $countryCode = CountryCodes::countryCodeLookup($capture->name);
 
         Station::firstOrCreate([
             'name' => $capture->name,
@@ -114,15 +111,12 @@ class ConnectionCapture extends Command
 
     protected function saveConnection($leg)
     {
+        $duration = Carbon::parse($leg->arrival)->diffInMinutes(Carbon::parse($leg->departure));
         $connection = Connection::firstOrCreate([
             'starting_station' => $leg->origin->id,
-            'ending_station' => $leg->destination->id
+            'ending_station' => $leg->destination->id,
+            'duration' => $duration
         ]);
-
-        $duration = Carbon::parse($leg->arrival)->diffInMinutes(Carbon::parse($leg->departure));
-        $connection->duration = $duration;
-        $connection->save();
-
         Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
     }
 }
