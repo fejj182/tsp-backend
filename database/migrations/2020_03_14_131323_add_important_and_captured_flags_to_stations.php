@@ -15,7 +15,7 @@ class AddImportantAndCapturedFlagsToStations extends Migration
     {
         Schema::table('stations', function (Blueprint $table) {
             $table->boolean('important')->default(false);
-            $table->boolean('captured')->default(false);
+            $table->unsignedBigInteger('captured_by')->nullable();
         });
     }
 
@@ -27,7 +27,7 @@ class AddImportantAndCapturedFlagsToStations extends Migration
     public function down()
     {
         Schema::table('stations', function (Blueprint $table) {
-            $table->dropColumn(['important', 'captured']);
+            $table->dropColumn(['important', 'captured_by']);
         });
     }
 }

@@ -56,7 +56,7 @@ class ConnectionCapture extends Command
                 $journey = $this->get('http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture");
 
                 if (!empty($journey)) {
-                    $captured = $this->captureJoiningStation($journey);
+                    $captured = $this->captureJoiningStation($journey, $connection);
                     Log::info(
                         $captured->name . "(" . $captured->station_id . ") captured from " .
                             $connection->starting_station . "-" . $connection->ending_station
@@ -76,6 +76,7 @@ class ConnectionCapture extends Command
     protected function getConnectionsToCapture(): Collection
     {
         return Connection::query()
+            ->select('connections.*')
             ->join('stations as s1', function ($join) {
                 $join->on('connections.starting_station', '=', 's1.station_id')
                     ->where([
@@ -94,9 +95,9 @@ class ConnectionCapture extends Command
             ->get();
     }
 
-    protected function captureJoiningStation($journey)
+    protected function captureJoiningStation($journey, $connection)
     {
-        return DB::transaction(function () use($journey) {
+        return DB::transaction(function () use($journey, $connection) {
             $capture = $journey->firstLeg->destination;
             $countryCode = CountryCodes::countryCodeLookup($capture->name);
 
@@ -109,7 +110,7 @@ class ConnectionCapture extends Command
                 'country' => $countryCode,
                 'lat' => $capture->location->latitude,
                 'lng' => $capture->location->longitude,
-                'captured' => true
+                'captured_by' => $connection->id
             ]);
         });
     }

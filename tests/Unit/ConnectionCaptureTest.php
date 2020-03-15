@@ -35,7 +35,7 @@ class ConnectionCaptureTest extends TestCase
 
     public function testCaptureCommand()
     {
-        factory(Connection::class)->create([
+        $connection = factory(Connection::class)->create([
             'starting_station' => $this->start->station_id,
             'ending_station' => $this->end->station_id,
             'duration' => 0
@@ -54,7 +54,7 @@ class ConnectionCaptureTest extends TestCase
 
         $this->assertNotEmpty($captured);
         $this->assertEquals('ES', $captured->country);
-        $this->assertEquals(true, $captured->captured);
+        $this->assertEquals($connection->id, $captured->captured_by);
         $this->assertEquals(false, $captured->important);
 
         $this->assertEquals(360, $startToMiddle->duration);
