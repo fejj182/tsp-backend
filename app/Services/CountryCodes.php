@@ -258,10 +258,11 @@ class CountryCodes
         'ZW' => 'Zimbabwe',
     );
     
-    public static function countryCodeLookup(String $stationName): String
+    public static function countryCodeLookup(String $stationName): array
     {
         preg_match_all('/\([A-Za-z]+\)/', $stationName, $matches);
         $countryName = str_replace(['(', ')'], '', end($matches[0]));
-        return array_search($countryName, self::$countries);
+        $countryCode = array_search($countryName, self::$countries);
+        return ['name' => $countryName, 'code' => $countryCode];
     }
 }

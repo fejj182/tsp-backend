@@ -97,17 +97,19 @@ class ConnectionCapture extends Command
 
     protected function captureJoiningStation($journey, $connection)
     {
-        return DB::transaction(function () use($journey, $connection) {
+        return DB::transaction(function () use ($journey, $connection) {
             $capture = $journey->firstLeg->destination;
-            $countryCode = CountryCodes::countryCodeLookup($capture->name);
+            $country = CountryCodes::countryCodeLookup($capture->name);
+
+            $stationName = ucwords(strtolower(trim(str_replace("(" . $country["name"] . ")", "", $capture->name))));
 
             $this->saveConnection($journey->firstLeg);
             $this->saveConnection($journey->secondLeg);
 
             return Station::firstOrCreate([
-                'name' => $capture->name,
+                'name' => $stationName,
                 'station_id' => $capture->id,
-                'country' => $countryCode,
+                'country' => $country["code"],
                 'lat' => $capture->location->latitude,
                 'lng' => $capture->location->longitude,
                 'captured_by' => $connection->id

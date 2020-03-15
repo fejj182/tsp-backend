@@ -53,6 +53,7 @@ class ConnectionCaptureTest extends TestCase
         $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertNotEmpty($captured);
+        $this->assertEquals('Barcelona', $captured->name);
         $this->assertEquals('ES', $captured->country);
         $this->assertEquals($connection->id, $captured->captured_by);
         $this->assertEquals(false, $captured->important);
