@@ -7,6 +7,7 @@ use App\Models\Station;
 use App\Services\CountryCodes;
 use App\Http\MakesHttpRequests;
 use Carbon\Carbon;
+use DB;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,8 +58,8 @@ class ConnectionCapture extends Command
                 if (!empty($journey)) {
                     $captured = $this->captureJoiningStation($journey);
                     Log::info(
-                        $captured->name . "(" . $captured->station_id . ") captured from " . 
-                        $connection->starting_station . "-" . $connection->ending_station
+                        $captured->name . "(" . $captured->station_id . ") captured from " .
+                            $connection->starting_station . "-" . $connection->ending_station
                     );
                 } else {
                     Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
@@ -95,20 +96,22 @@ class ConnectionCapture extends Command
 
     protected function captureJoiningStation($journey)
     {
-        $capture = $journey->firstLeg->destination;
-        $countryCode = CountryCodes::countryCodeLookup($capture->name);
+        return DB::transaction(function () use($journey) {
+            $capture = $journey->firstLeg->destination;
+            $countryCode = CountryCodes::countryCodeLookup($capture->name);
 
-        $this->saveConnection($journey->firstLeg);
-        $this->saveConnection($journey->secondLeg);
+            $this->saveConnection($journey->firstLeg);
+            $this->saveConnection($journey->secondLeg);
 
-        return Station::firstOrCreate([
-            'name' => $capture->name,
-            'station_id' => $capture->id,
-            'country' => $countryCode,
-            'lat' => $capture->location->latitude,
-            'lng' => $capture->location->longitude,
-            'captured' => true
-        ]);
+            return Station::firstOrCreate([
+                'name' => $capture->name,
+                'station_id' => $capture->id,
+                'country' => $countryCode,
+                'lat' => $capture->location->latitude,
+                'lng' => $capture->location->longitude,
+                'captured' => true
+            ]);
+        });
     }
 
     protected function saveConnection($leg)
