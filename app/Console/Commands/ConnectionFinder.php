@@ -68,6 +68,7 @@ class ConnectionFinder extends Command
             $this->info('Finished');
         } catch (Exception $e) {
             $this->info('Failed');
+            $this->info($e->getMessage());
         }
     }
 

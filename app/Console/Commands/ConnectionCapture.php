@@ -57,10 +57,11 @@ class ConnectionCapture extends Command
 
                 if (!empty($journey)) {
                     $captured = $this->captureJoiningStation($journey, $connection);
-                    Log::info(
-                        $captured->name . "(" . $captured->station_id . ") captured from " .
-                            $connection->starting_station . "-" . $connection->ending_station
-                    );
+                    if ($captured->wasRecentlyCreated) {
+                        Log::info($captured->name . " (" . $captured->station_id . ") captured from " . $connection->starting_station . "-" . $connection->ending_station);
+                    } else {
+                        Log::info("Already captured: " . $captured->name . " (" . $captured->station_id . ") ");
+                    }
                 } else {
                     Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
                 }
@@ -70,6 +71,7 @@ class ConnectionCapture extends Command
             $this->info('Finished');
         } catch (Exception $e) {
             $this->info('Failed');
+            $this->info($e->getMessage());
         }
     }
 
@@ -106,24 +108,27 @@ class ConnectionCapture extends Command
             $this->saveConnection($journey->firstLeg);
             $this->saveConnection($journey->secondLeg);
 
-            return Station::firstOrCreate([
-                'name' => $stationName,
-                'station_id' => $capture->id,
-                'country' => $country["code"],
-                'lat' => $capture->location->latitude,
-                'lng' => $capture->location->longitude,
-                'captured_by' => $connection->id
-            ]);
+            return Station::firstOrCreate(
+                ['station_id' => $capture->id],
+                [
+                    'name' => $stationName, 
+                    'country' => $country["code"],
+                    'lat' => $capture->location->latitude,
+                    'lng' => $capture->location->longitude, 'captured_by' => $connection->id
+                ]
+            );
         });
     }
 
     protected function saveConnection($leg)
     {
         $duration = Carbon::parse($leg->arrival)->diffInMinutes(Carbon::parse($leg->departure));
-        return Connection::firstOrCreate([
-            'starting_station' => $leg->origin->id,
-            'ending_station' => $leg->destination->id,
-            'duration' => $duration
-        ]);
+        return Connection::firstOrCreate(
+            [
+                'starting_station' => $leg->origin->id,
+                'ending_station' => $leg->destination->id
+            ],
+            ['duration' => $duration]
+        );
     }
 }
