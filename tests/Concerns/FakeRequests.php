@@ -40,6 +40,15 @@ trait FakeRequests
         $this->mockHandler->append(new Response(500, [], null));
     }
 
+    protected function assertGuzzleCalledTimes($times)
+    {
+        $this->assertTrue(
+            count($this->history) === $times,
+            'Guzzle was called ' . count($this->history) . ' times, expected ' . $times . ' times'
+        );
+    }
+
+
     protected function assertGuzzleNotCalled()
     {
         $this->assertTrue(count($this->history) === 0, 'Guzzle was called ' . count($this->history) . ' times.');

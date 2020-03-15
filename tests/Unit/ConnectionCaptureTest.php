@@ -12,12 +12,8 @@ class ConnectionCaptureTest extends TestCase
     use FakeRequests;
 
     protected $start;
-    protected $middle;
     protected $end;
-    protected $leg1;
-    protected $leg2;
-    protected $leg3;
-    protected $leg4;
+    protected $connectionId;
 
     protected function setUp(): void
     {
@@ -25,240 +21,75 @@ class ConnectionCaptureTest extends TestCase
         $this->setUpClient();
         Log::spy();
 
-        $this->start = [
-            'id' => 123,
-            'name' => 'VALENCIA (Spain)',
-            'location' => [
-                "longitude" => 1,
-                "latitude" => 1
-            ],
-        ];
-        $this->middle = [
-            'id' => 456,
-            'name' => 'BARCELONA (Spain)',
-            'location' => [
-                "longitude" => 2,
-                "latitude" => 2
-            ],
-        ];
-        $this->end = [
-            'id' => 789,
-            'name' => 'PARIS NORD (France)',
-            'location' => [
-                "longitude" => 3,
-                "latitude" => 3
-            ],
-        ];
-
-        $this->leg1 = [
-            "origin" => $this->start,
-            "destination" => $this->middle,
-            "departure" => "2020-03-11T10:00:00.000+01:00",
-            "arrival" => "2020-03-11T16:00:00.000+01:00"
-        ];
-
-        $this->leg2 = [
-            "origin" => $this->middle,
-            "destination" => $this->end,
-            "departure" => "2020-03-11T16:00:00.000+01:00",
-            "arrival" => "2020-03-11T17:30:00.000+01:00"
-        ];
-
-        $this->leg3 = [
-            "origin" => $this->end,
-            "destination" => $this->middle,
-            "departure" => "2020-03-11T10:00:00.000+01:00",
-            "arrival" => "2020-03-11T11:00:00.000+01:00"
-        ];
-
-        $this->leg4 = [
-            "origin" => $this->middle,
-            "destination" => $this->start,
-            "departure" => "2020-03-11T12:00:00.000+01:00",
-            "arrival" => "2020-03-11T18:30:00.000+01:00"
-        ];
-    }
-
-    protected function setUpStations()
-    {
-        factory(Station::class)->create([
-            'station_id' => 123,
+        $this->start = factory(Station::class)->create([
             'country' => 'ES',
             'important' => true
         ]);
-        factory(Station::class)->create([
-            'station_id' => 789,
-            'country' => 'ES',
-            'important' => true
-        ]);
-    }
-
-    protected function setUpStationsInDifferentCountries()
-    {
-        factory(Station::class)->create([
-            'station_id' => 123,
-            'country' => 'ES',
-            'important' => true
-        ]);
-        factory(Station::class)->create([
-            'station_id' => 789,
+        $this->end = factory(Station::class)->create([
             'country' => 'FR',
             'important' => true
         ]);
+
+        $this->connectionId = rand(0, 999);
     }
 
-    protected function setUpNotImportantStations()
-    {
-        factory(Station::class)->create([
-            'station_id' => 123,
-            'country' => 'ES',
-            'important' => false
-        ]);
-        factory(Station::class)->create([
-            'station_id' => 789,
-            'country' => 'ES',
-            'important' => false
-        ]);
-    }
-
-    protected function setUpConnections()
+    public function testCaptureCommand()
     {
         factory(Connection::class)->create([
-            'starting_station' => 123,
-            'ending_station' => 789,
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
             'duration' => 0
         ]);
-        factory(Connection::class)->create([
-            'starting_station' => 789,
-            'ending_station' => 123,
-            'duration' => 0
-        ]);
-    }
 
-    protected function setUpConnectionsWithDurations()
-    {
-        factory(Connection::class)->create([
-            'starting_station' => 123,
-            'ending_station' => 789,
-            'duration' => 90
-        ]);
-        factory(Connection::class)->create([
-            'starting_station' => 789,
-            'ending_station' => 123,
-            'duration' => 120
-        ]);
-    }
-
-    protected function setUpConnectionsWithNoDurations()
-    {
-        factory(Connection::class)->create([
-            'starting_station' => 123,
-            'ending_station' => 789,
-        ]);
-        factory(Connection::class)->create([
-            'starting_station' => 789,
-            'ending_station' => 123,
-        ]);
-    }
-
-    public function testCaptureCommandSameCountry()
-    {
-        $this->setUpStations();
-        $this->setUpConnections();
-
-        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
-        $this->addFakeJsonResponse(["firstLeg" => $this->leg3, "secondLeg" => $this->leg4]);
+        $this->addFakeJsonResponse($this->fakeLegs($this->start, $this->end));
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
-        $startToMiddle = Connection::query()->where([
-            ['starting_station', '=', $this->start['id']],
-            ['ending_station', '=', $this->middle['id']]
-        ])->first();
-        $middleToEnd = Connection::query()->where([
-            ['starting_station', '=', $this->middle['id']],
-            ['ending_station', '=', $this->end['id']],
-        ])->first();
-        $endToMiddle = Connection::query()->where([
-            ['starting_station', '=', $this->end['id']],
-            ['ending_station', '=', $this->middle['id']],
-        ])->first();
-        $middleToStart = Connection::query()->where([
-            ['starting_station', '=', $this->middle['id']],
-            ['ending_station', '=', $this->start['id']]
-        ])->first();
+        $startToMiddle = Connection::query()->where('starting_station', '=', $this->start->station_id)->first();
+        $middleToEnd = Connection::query()->where('starting_station', '=', $this->connectionId)->first();
 
-        $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertNotEmpty($captured);
         $this->assertEquals('ES', $captured->country);
         $this->assertEquals(true, $captured->captured);
         $this->assertEquals(false, $captured->important);
+
         $this->assertEquals(360, $startToMiddle->duration);
         $this->assertEquals(90, $middleToEnd->duration);
-        $this->assertEquals(60, $endToMiddle->duration);
-        $this->assertEquals(390, $middleToStart->duration);
-    }
 
-    public function testCaptureCommandDifferentCountries()
-    {
-        $this->setUpStationsInDifferentCountries();
-        $this->setUpConnections();
-
-        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
-        $this->artisan('connections:capture ES')
-            ->expectsOutput('Finished')
-            ->assertExitCode(0);
-
-        $startToMiddle = Connection::query()->where([
-            ['starting_station', '=', $this->start['id']],
-            ['ending_station', '=', $this->middle['id']]
-        ])->first();
-        $middleToEnd = Connection::query()->where([
-            ['starting_station', '=', $this->middle['id']],
-            ['ending_station', '=', $this->end['id']],
-        ])->first();
-        $endToMiddle = Connection::query()->where([
-            ['starting_station', '=', $this->end['id']],
-            ['ending_station', '=', $this->middle['id']],
-        ])->first();
-        $middleToStart = Connection::query()->where([
-            ['starting_station', '=', $this->middle['id']],
-            ['ending_station', '=', $this->start['id']]
-        ])->first();
-
-        $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
-
-        $this->assertNotEmpty($captured);
-        $this->assertEquals(360, $startToMiddle->duration);
-        $this->assertEquals(90, $middleToEnd->duration);
-        $this->assertEmpty($endToMiddle);
-        $this->assertEmpty($middleToStart);
+        $this->assertGuzzleCalledTimes(1);
     }
 
     public function testCaptureCommandConnectionsAlreadyHaveDurations()
     {
-        $this->setUpStations();
-        $this->setUpConnectionsWithDurations();
+        factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 90
+        ]);
 
-        $this->addFakeJsonResponse(["firstLeg" => $this->leg1, "secondLeg" => $this->leg2]);
-        $this->addFakeJsonResponse(["firstLeg" => $this->leg3, "secondLeg" => $this->leg4]);
+        $this->addFakeJsonResponse($this->fakeLegs($this->start, $this->end));
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
-        $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertEmpty($captured);
+        $this->assertGuzzleNotCalled();
     }
 
     public function testCaptureCommandConnectionsFailedResponse()
     {
-        $this->setUpStations();
-        $this->setUpConnections();
+        factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 0
+        ]);
 
         $this->addErrorResponse();
 
@@ -266,35 +97,100 @@ class ConnectionCaptureTest extends TestCase
             ->expectsOutput('Failed')
             ->assertExitCode(0);
 
-        $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertEmpty($captured);
+        $this->assertGuzzleCalledTimes(1);
     }
 
     public function testCaptureCommandShouldNotTryAndCallApiForNotImportantStations()
     {
-        $this->setUpNotImportantStations();
-        $this->setUpConnections();
+        $start = factory(Station::class)->create([
+            'country' => 'ES',
+            'important' => false
+        ]);
+        $end = factory(Station::class)->create([
+            'country' => 'FR',
+            'important' => false
+        ]);
+
+        factory(Connection::class)->create([
+            'starting_station' => $start->station_id,
+            'ending_station' => $end->station_id,
+            'duration' => 0
+        ]);
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
+
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
+        $this->assertEmpty($captured);
 
         $this->assertGuzzleNotCalled();
     }
 
     public function testCaptureCommandShouldNotCallApiIfDurationHasNotExpired()
     {
-        $this->setUpStations();
-        $this->setUpConnections();
+        factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 0
+        ]);
+
         $this->artisan('connections:capture ES --days=1')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
-        $captured = Station::query()->where('station_id', '=', $this->middle['id'])->first();
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertEmpty($captured);
+        $this->assertGuzzleNotCalled();
     }
 
-    //TODO: Add guzzle calledXtimes asserts and test logs
+    //TODO: Test logs
+
+    protected function fakeLegs($start, $end)
+    {
+        $origin = [
+            'id' => $start->station_id,
+            'name' => 'VALENCIA (Spain)',
+            'location' => [
+                "longitude" => 1,
+                "latitude" => 1
+            ],
+        ];
+        $connection = [
+            'id' => $this->connectionId,
+            'name' => 'BARCELONA (Spain)',
+            'location' => [
+                "longitude" => 2,
+                "latitude" => 2
+            ],
+        ];
+        $destination = [
+            'id' => $end->station_id,
+            'name' => 'PARIS NORD (France)',
+            'location' => [
+                "longitude" => 3,
+                "latitude" => 3
+            ],
+        ];
+
+        $leg1 = [
+            "origin" => $origin,
+            "destination" => $connection,
+            "departure" => "2020-03-11T10:00:00.000+01:00",
+            "arrival" => "2020-03-11T16:00:00.000+01:00"
+        ];
+
+        $leg2 = [
+            "origin" => $connection,
+            "destination" => $destination,
+            "departure" => "2020-03-11T16:00:00.000+01:00",
+            "arrival" => "2020-03-11T17:30:00.000+01:00"
+        ];
+
+        return ["firstLeg" => $leg1, "secondLeg" => $leg2];
+    }
 }
