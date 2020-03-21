@@ -32,6 +32,8 @@ class ConnectionCapture extends Command
      */
     protected $description = 'Captures connecting city (and durations) where train changes between two stations';
 
+    protected $host;
+
     /**
      * Create a new command instance.
      *
@@ -41,6 +43,7 @@ class ConnectionCapture extends Command
     {
         parent::__construct();
         $this->client = $client;
+        $this->host = env('CONNECTION_COMMAND_HOST');
     }
 
     /**
@@ -53,7 +56,8 @@ class ConnectionCapture extends Command
         try {
             $connections = $this->getConnectionsToCapture();
             $connections->each(function ($connection) {
-                $journey = $this->get('http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station . "/capture");
+                
+                $journey = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}/capture");
 
                 if (!empty($journey)) {
                     $captured = $this->captureJoiningStation($journey, $connection);

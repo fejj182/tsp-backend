@@ -48,6 +48,16 @@ trait FakeRequests
         );
     }
 
+    protected function assertGuzzleCalledWithUrl($url)
+    {
+        $result = false;
+        foreach ($this->history as $transaction) {
+            if (strval($transaction['request']->getUri()) === $url) {
+                $result = true;
+            }
+        }
+        $this->assertTrue($result);
+    }
 
     protected function assertGuzzleNotCalled()
     {

@@ -61,6 +61,7 @@ class ConnectionCaptureTest extends TestCase
         $this->assertEquals(360, $startToMiddle->duration);
         $this->assertEquals(90, $middleToEnd->duration);
 
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/{$connection->starting_station}/{$connection->ending_station}/capture");
         $this->assertGuzzleCalledTimes(1);
     }
 
@@ -86,7 +87,7 @@ class ConnectionCaptureTest extends TestCase
 
     public function testCaptureCommandConnectionsFailedResponse()
     {
-        factory(Connection::class)->create([
+        $connection = factory(Connection::class)->create([
             'starting_station' => $this->start->station_id,
             'ending_station' => $this->end->station_id,
             'duration' => 0
@@ -101,6 +102,7 @@ class ConnectionCaptureTest extends TestCase
         $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
 
         $this->assertEmpty($captured);
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/{$connection->starting_station}/{$connection->ending_station}/capture");
         $this->assertGuzzleCalledTimes(1);
     }
 
