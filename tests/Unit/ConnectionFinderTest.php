@@ -35,10 +35,12 @@ class ConnectionFinderTest extends TestCase
         $this->barcelonaToValencia = [
             'starting_station' => 123,
             'ending_station' => 456,
+            'duration' => null
         ];
         $this->valenciaToBarcelona = [
             'starting_station' => 456,
             'ending_station' => 123,
+            'duration' => null
         ];
     }
 
@@ -67,6 +69,10 @@ class ConnectionFinderTest extends TestCase
 
         $this->assertEquals(60, $barcelonaToValencia->duration);
         $this->assertEquals(90, $valenciaToBarcelona->duration);
+
+        $this->assertGuzzleCalledTimes(2);
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456");
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/456/123");
     }
 
     public function testFinderCommandShouldFailedResponse()
@@ -85,6 +91,9 @@ class ConnectionFinderTest extends TestCase
 
         $this->assertNull($barcelonaToValencia->duration);
         $this->assertNull($valenciaToBarcelona->duration);
+        
+        $this->assertGuzzleCalledTimes(1);
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456");
     }
 
     public function testFinderCommandShouldNotCallApiIfDurationHasNotExpired()
@@ -103,6 +112,8 @@ class ConnectionFinderTest extends TestCase
 
         $this->assertEquals(0, $barcelonaToValencia->duration);
         $this->assertEquals(0, $valenciaToBarcelona->duration);
+
+        $this->assertGuzzleNotCalled();
     }
     
     // TODO: Test logs

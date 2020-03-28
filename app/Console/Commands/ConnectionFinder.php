@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\MakesHttpRequests;
 use App\Models\Connection;
 use App\Models\Station;
 use Carbon\Carbon;
@@ -12,6 +13,8 @@ use Log;
 
 class ConnectionFinder extends Command
 {
+    use MakesHttpRequests;
+
     /**
      * The name and signature of the console command.
      *
@@ -35,6 +38,7 @@ class ConnectionFinder extends Command
     {
         parent::__construct();
         $this->client = $client;
+        $this->host = env('CONNECTION_COMMAND_HOST');
 
         $this->durationNotExpired = function ($query) {
             $days = $this->option('days');
@@ -74,11 +78,9 @@ class ConnectionFinder extends Command
 
     protected function updateConnection($connection)
     {
-        $url = 'http://localhost:3000/journeys/' . $connection->starting_station . '/' . $connection->ending_station;
-        $res = $this->client->request('GET', $url);
-        $body = json_decode($res->getBody());
+        $result = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}");
 
-        $duration = $body->duration;
+        $duration = $result->duration;
         $connection->duration = $duration;
         $connection->save();
 
