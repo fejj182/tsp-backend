@@ -2,6 +2,7 @@
 
 use App\Models\Connection;
 use App\Models\Station;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Concerns\FakeRequests;
@@ -73,8 +74,6 @@ class ConnectionCaptureTest extends TestCase
             'duration' => 90
         ]);
 
-        $this->addFakeJsonResponse($this->fakeLegs($this->start, $this->end));
-
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
@@ -83,6 +82,33 @@ class ConnectionCaptureTest extends TestCase
 
         $this->assertEmpty($captured);
         $this->assertGuzzleNotCalled();
+    }
+
+    public function testCaptureCommandReturnsEmptyResponse()
+    {
+        $connection = factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 0,
+            'updated_at' => Carbon::now()->subDays(2)
+        ]);
+        $secondConnection = factory(Connection::class)->create([
+            'starting_station' => 123,
+            'ending_station' => 456,
+            'duration' => 0,
+            'updated_at' => Carbon::now()->subDay()
+        ]);
+
+        $this->addFakeJsonResponse([]);
+        $this->artisan('connections:capture ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $captured = Station::query()->where('station_id', '=', $this->connectionId)->first();
+
+        $this->assertEmpty($captured);
+        $this->assertGuzzleCalledTimes(1);
+        $this->assertTrue(new Carbon($connection->update_at) > new Carbon($secondConnection->updated_at));
     }
 
     public function testCaptureCommandConnectionsFailedResponse()

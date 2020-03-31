@@ -67,6 +67,8 @@ class ConnectionCapture extends Command
                         Log::info("Already captured: " . $captured->name . " (" . $captured->station_id . ") ");
                     }
                 } else {
+                    $connection->updated_at = Carbon::now();
+                    $connection->save();
                     Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
                 }
 
