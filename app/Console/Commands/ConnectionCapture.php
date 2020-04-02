@@ -59,7 +59,7 @@ class ConnectionCapture extends Command
                 
                 $journey = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}/capture");
 
-                if (!empty($journey)) {
+                if (isset($journey->firstLeg) && isset($journey->secondLeg)) {
                     $captured = $this->captureJoiningStation($journey, $connection);
                     if ($captured->wasRecentlyCreated) {
                         Log::info($captured->name . " (" . $captured->station_id . ") captured from " . $connection->starting_station . "-" . $connection->ending_station);
@@ -67,8 +67,7 @@ class ConnectionCapture extends Command
                         Log::info("Already captured: " . $captured->name . " (" . $captured->station_id . ") ");
                     }
                 } else {
-                    $connection->updated_at = Carbon::now();
-                    $connection->save();
+                    $this->updateConnection($connection, $journey);
                     Log::info("No capture: " . $connection->starting_station . "-" . $connection->ending_station);
                 }
 
@@ -136,5 +135,15 @@ class ConnectionCapture extends Command
             ],
             ['duration' => $duration]
         );
+    }
+
+    protected function updateConnection($connection, $journey)
+    {
+        if (isset($journey->firstLeg)) {
+            $duration = Carbon::parse($journey->firstLeg->arrival)->diffInMinutes(Carbon::parse($journey->firstLeg->departure));
+            $connection->duration = $duration;
+        }
+        $connection->updated_at = Carbon::now();
+        $connection->save();
     }
 }

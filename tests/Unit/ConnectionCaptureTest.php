@@ -42,7 +42,7 @@ class ConnectionCaptureTest extends TestCase
             'duration' => 0
         ]);
 
-        $this->addFakeJsonResponse($this->fakeLegs($this->start, $this->end));
+        $this->addFakeJsonResponse($this->twoLegs($this->start, $this->end));
 
         $this->artisan('connections:capture ES')
             ->expectsOutput('Finished')
@@ -109,6 +109,24 @@ class ConnectionCaptureTest extends TestCase
         $this->assertEmpty($captured);
         $this->assertGuzzleCalledTimes(1);
         $this->assertTrue(new Carbon($connection->update_at) > new Carbon($secondConnection->updated_at));
+    }
+
+    public function testCaptureCommandReturnsOnlyFirstLeg()
+    {
+        factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 0
+        ]);
+
+        $this->addFakeJsonResponse($this->oneLegOnly($this->start, $this->end));
+
+        $this->artisan('connections:capture ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $this->assertGuzzleCalledTimes(1);
+        $this->assertEquals(360, Connection::first()->duration);
     }
 
     public function testCaptureCommandConnectionsFailedResponse()
@@ -179,7 +197,7 @@ class ConnectionCaptureTest extends TestCase
 
     //TODO: Test logs
 
-    protected function fakeLegs($start, $end)
+    protected function twoLegs($start, $end)
     {
         $origin = [
             'id' => $start->station_id,
@@ -221,5 +239,34 @@ class ConnectionCaptureTest extends TestCase
         ];
 
         return ["firstLeg" => $leg1, "secondLeg" => $leg2];
+    }
+
+    protected function oneLegOnly($start, $end)
+    {
+        $origin = [
+            'id' => $start->station_id,
+            'name' => 'VALENCIA (Spain)',
+            'location' => [
+                "longitude" => 1,
+                "latitude" => 1
+            ],
+        ];
+        $destination = [
+            'id' => $end->station_id,
+            'name' => 'PARIS NORD (France)',
+            'location' => [
+                "longitude" => 3,
+                "latitude" => 3
+            ],
+        ];
+
+        $leg1 = [
+            "origin" => $origin,
+            "destination" => $destination,
+            "departure" => "2020-03-11T10:00:00.000+01:00",
+            "arrival" => "2020-03-11T16:00:00.000+01:00"
+        ];
+
+        return ["firstLeg" => $leg1];
     }
 }
