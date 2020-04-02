@@ -129,6 +129,29 @@ class ConnectionCaptureTest extends TestCase
         $this->assertEquals(360, Connection::first()->duration);
     }
 
+    public function testCaptureCommandConnectionAlreadyCaptured()
+    {
+        $connection = factory(Connection::class)->create([
+            'starting_station' => $this->start->station_id,
+            'ending_station' => $this->end->station_id,
+            'duration' => 0,
+            'updated_at' => Carbon::now()->subDay()
+        ]);
+
+        factory(Station::class)->create([
+            'station_id' => $this->connectionId
+        ]);
+
+        $this->addFakeJsonResponse($this->twoLegs($this->start, $this->end));
+
+        $this->artisan('connections:capture ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $this->assertGuzzleCalledTimes(1);
+        $this->assertTrue(Connection::first()->updated_at > $connection->updated_at);
+    }
+
     public function testCaptureCommandConnectionsFailedResponse()
     {
         $connection = factory(Connection::class)->create([

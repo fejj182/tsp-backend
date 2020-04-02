@@ -64,6 +64,7 @@ class ConnectionCapture extends Command
                     if ($captured->wasRecentlyCreated) {
                         Log::info($captured->name . " (" . $captured->station_id . ") captured from " . $connection->starting_station . "-" . $connection->ending_station);
                     } else {
+                        $this->updateConnection($connection);
                         Log::info("Already captured: " . $captured->name . " (" . $captured->station_id . ") ");
                     }
                 } else {
@@ -119,7 +120,8 @@ class ConnectionCapture extends Command
                     'name' => $stationName, 
                     'country' => $country["code"],
                     'lat' => $capture->location->latitude,
-                    'lng' => $capture->location->longitude, 'captured_by' => $connection->id
+                    'lng' => $capture->location->longitude, 
+                    'captured_by' => $connection->id
                 ]
             );
         });
@@ -137,7 +139,7 @@ class ConnectionCapture extends Command
         );
     }
 
-    protected function updateConnection($connection, $journey)
+    protected function updateConnection($connection, $journey = null)
     {
         if (isset($journey->firstLeg)) {
             $duration = Carbon::parse($journey->firstLeg->arrival)->diffInMinutes(Carbon::parse($journey->firstLeg->departure));
