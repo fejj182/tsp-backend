@@ -144,6 +144,7 @@ class ConnectionCapture extends Command
         if (isset($journey->firstLeg)) {
             $duration = Carbon::parse($journey->firstLeg->arrival)->diffInMinutes(Carbon::parse($journey->firstLeg->departure));
             $connection->duration = $duration;
+            Log::info("Bonus capture: " . $connection->starting_station . "-" . $connection->ending_station);
         }
         $connection->updated_at = Carbon::now();
         $connection->save();
