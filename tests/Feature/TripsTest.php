@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Connection;
 use App\Models\Station;
 use App\Models\Trip;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -28,8 +29,9 @@ class TripsTest extends TestCase
             'lng' => -0.377433
         ];
 
-        factory(Station::class)->create($this->barcelona);
-        factory(Station::class)->create($this->valencia);
+        // note: creating this way to ensure property order in assertExactJson
+        $this->startingStation = factory(Station::class)->create($this->barcelona);
+        $this->endingStation = factory(Station::class)->create($this->valencia);
     }
 
     public function testTripCreated()
@@ -57,11 +59,30 @@ class TripsTest extends TestCase
 
     public function testGetTrip()
     {
+        factory(Connection::class)->create([
+            'starting_station' => $this->startingStation->station_id,
+            'ending_station' => $this->endingStation->station_id,
+            'duration' => 123
+        ]);
+
+        factory(Connection::class)->create([
+            'starting_station' => $this->endingStation->station_id,
+            'ending_station' => $this->startingStation->station_id,
+            'duration' => 321
+        ]);
+
         $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia, $this->barcelona)]);
         $trip = Trip::query()->first();
         $response = $this->get('/api/trip/' . $trip->alias);
+
+        $firstConnection = $this->valencia;
+        $firstConnection['duration'] = 123;
+
+        $secondConnection = $this->barcelona;
+        $secondConnection['duration'] = 321;
+
         $response->assertStatus(200);
-        $response->assertExactJson([$this->barcelona, $this->valencia, $this->barcelona]);
+        $response->assertExactJson([$this->barcelona, $firstConnection, $secondConnection]);
     }
 
     public function testUpdateTrip()
