@@ -85,6 +85,12 @@ class TripsTest extends TestCase
         $response->assertExactJson([$this->barcelona, $firstConnection, $secondConnection]);
     }
 
+    public function testGetTrip_whenTripDoesntExist_Return404()
+    {
+        $response = $this->get('/api/trip/notatrip');
+        $response->assertStatus(404);
+    }
+
     public function testUpdateTrip()
     {
         $this->post('/api/trip', ["trip" => array($this->barcelona, $this->valencia)]);

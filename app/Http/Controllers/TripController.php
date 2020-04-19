@@ -23,6 +23,11 @@ class TripController extends Controller
     public function get(String $alias): array
     {
         $trip = Trip::where('alias', $alias)->first();
+        
+        if ($trip == null) {
+            abort(404);
+        }
+
         $stationIds = $trip->tripStops()->pluck('station_id');
         $response = [];
 
