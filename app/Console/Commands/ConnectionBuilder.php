@@ -14,7 +14,7 @@ class ConnectionBuilder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:build';
+    protected $signature = 'connections:build {--country=*}';
 
     /**
      * The console command description.
@@ -40,7 +40,9 @@ class ConnectionBuilder extends Command
      */
     public function handle()
     {
-        $stations = Station::where('enabled', '=', true)->get();
+        $stations = Station::where('enabled', '=', true)
+        ->whereIn('country', $this->option('country'))
+        ->get();
 
         $stations->each(function($startingStation) use ($stations) {
             $stations->each(function($endingStation) use ($startingStation) {
