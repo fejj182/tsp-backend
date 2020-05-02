@@ -14,21 +14,22 @@ class StationSeeder extends Seeder
     public function run()
     {
         $googleDrive = new GoogleDrive();
-        $response = $googleDrive->getFile('1Mk1YngCGedaeZOGzuF6Yt-gUbpfdRhxe');
+        $response = $googleDrive->getFile(env('STATIONS_SEED'));
         $lines = explode("\n", $response);
 
         foreach ($lines as $line) {
             if (strlen($line) > 0) {
-                $row = str_getcsv($line, ";");
+                $row = str_getcsv($line);
                 DB::table('stations')->insert([
                     'id' => Uuid::uuid4(),
-                    'station_id' => $row[1],
+                    'station_id' => $row[2],
                     'name' => $row[0],
-                    'lat' => round(floatval($row[2]), 6),
-                    'lng' => round(floatval($row[3]), 6),
-                    'country' => $row[4],
-                    'enabled' => true,
-                    'important' => true
+                    'slug' => $row[1],
+                    'lat' => round(floatval($row[3]), 6),
+                    'lng' => round(floatval($row[4]), 6),
+                    'country' => $row[5],
+                    'enabled' => $row[6],
+                    'important' => $row[6]
                 ]);
             }
         }

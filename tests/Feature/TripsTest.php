@@ -19,12 +19,14 @@ class TripsTest extends TestCase
         $this->barcelona = [
             'id' => (string) Uuid::uuid4(),
             'name' => 'Barcelona-Sants',
+            'slug' => 'barcelona-sants',
             'lat' => 41.379520,
             'lng' => 2.140624
         ];
         $this->valencia = [
             'id' => (string) Uuid::uuid4(),
             'name' => 'Valencia-Estacio del Nord',
+            'slug' => 'valencia-estacio-del-nord',
             'lat' => 39.465064,
             'lng' => -0.377433
         ];

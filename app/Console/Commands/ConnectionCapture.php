@@ -56,7 +56,7 @@ class ConnectionCapture extends Command
         try {
             $connections = $this->getConnectionsToCapture();
             $connections->each(function ($connection) {
-                
+
                 $journey = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}/capture");
 
                 if (isset($journey->firstLeg) && isset($journey->secondLeg)) {
@@ -117,10 +117,11 @@ class ConnectionCapture extends Command
             return Station::firstOrCreate(
                 ['station_id' => $capture->id],
                 [
-                    'name' => $stationName, 
+                    'name' => $stationName,
+                    'slug' => '',
                     'country' => $country["code"],
                     'lat' => $capture->location->latitude,
-                    'lng' => $capture->location->longitude, 
+                    'lng' => $capture->location->longitude,
                     'captured_by' => $connection->id
                 ]
             );

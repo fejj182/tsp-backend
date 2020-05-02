@@ -34,7 +34,7 @@ class ConnectionCaptureTest extends TestCase
         $this->connectionId = rand(0, 999);
     }
 
-    public function testCaptureCommand()
+    public function testCaptureCommandWithDurationZero()
     {
         $connection = factory(Connection::class)->create([
             'starting_station' => $this->start->station_id,
