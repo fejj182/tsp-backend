@@ -14,5 +14,6 @@ $factory->define(Station::class, function (Faker $faker) {
         'lng' => $faker->longitude,
         'country' => $faker->country,
         'enabled' => true,
+        'important' => true
     ];
 });

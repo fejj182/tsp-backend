@@ -38,7 +38,7 @@ class ConnectionBuilderTest extends TestCase
         ];
         $this->disabled = [
             'station_id' => 999,
-            'enabled' => false,
+            'important' => false,
             'country' => 'ES'
         ];
     }
@@ -59,7 +59,7 @@ class ConnectionBuilderTest extends TestCase
         $this->assertEquals(null, $portoToBarcelona->duration);
     }
 
-    public function testConnectionBuilderOnlyUsesEnabledStations()
+    public function testConnectionBuilderOnlyUsesImportantStations()
     {
         factory(Station::class)->create($this->barcelona);
         factory(Station::class)->create($this->porto);

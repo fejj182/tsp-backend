@@ -28,7 +28,7 @@ class StationSeeder extends Seeder
                     'lat' => round(floatval($row[3]), 6),
                     'lng' => round(floatval($row[4]), 6),
                     'country' => $row[5],
-                    'enabled' => $row[6],
+                    'enabled' => false,
                     'important' => $row[6]
                 ]);
             }

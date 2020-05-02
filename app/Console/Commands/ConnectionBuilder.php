@@ -40,7 +40,7 @@ class ConnectionBuilder extends Command
      */
     public function handle()
     {
-        $stations = Station::where('enabled', '=', true)
+        $stations = Station::where('important', '=', true)
         ->whereIn('country', $this->option('country'))
         ->get();
 
