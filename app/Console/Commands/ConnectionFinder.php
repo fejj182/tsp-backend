@@ -20,7 +20,7 @@ class ConnectionFinder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:find {country} {--days=0} {--sleep=0}';
+    protected $signature = 'connections:find {--country=*} {--days=0} {--sleep=0}';
 
     /**
      * The console command description.
@@ -54,9 +54,9 @@ class ConnectionFinder extends Command
      */
     public function handle()
     {
-        $country = $this->argument('country');
+        $countries = $this->option('country');
 
-        $stations = Station::query()->where('country', '=', $country)->get();
+        $stations = Station::query()->whereIn('country', $countries)->get();
 
         try {
             $stations->each(function ($station) {

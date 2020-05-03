@@ -60,7 +60,7 @@ class ConnectionFinderTest extends TestCase
         $this->addFakeJsonResponse(['duration' => 60]);
         $this->addFakeJsonResponse(['duration' => 90]);
 
-        $this->artisan('connections:find ES')
+        $this->artisan('connections:find --country=ES')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
@@ -82,7 +82,7 @@ class ConnectionFinderTest extends TestCase
         $this->addErrorResponse();
         $this->addFakeJsonResponse(['duration' => 90]);
 
-        $this->artisan('connections:find ES')
+        $this->artisan('connections:find --country=ES')
             ->expectsOutput('Failed')
             ->assertExitCode(0);
 
@@ -103,7 +103,7 @@ class ConnectionFinderTest extends TestCase
 
         $this->createStationsAndConnections();
 
-        $this->artisan('connections:find ES --days=1')
+        $this->artisan('connections:find --country=ES --days=1')
             ->expectsOutput('Finished')
             ->assertExitCode(0);
 
@@ -114,6 +114,45 @@ class ConnectionFinderTest extends TestCase
         $this->assertEquals(0, $valenciaToBarcelona->duration);
 
         $this->assertGuzzleNotCalled();
+    }
+
+    public function testFinderCommandShouldWorkBetweenCountries()
+    {
+        $this->paris = [
+            'name' => 'Paris',
+            'station_id' => 789,
+            'country' => 'FR'
+        ];
+
+        $this->barcelonaToParis = [
+            'starting_station' => 123,
+            'ending_station' => 789,
+            'duration' => null
+        ];
+
+        $this->parisToBarcelona = [
+            'starting_station' => 789,
+            'ending_station' => 123,
+            'duration' => null
+        ];
+
+        factory(Station::class)->create($this->barcelona);
+        factory(Station::class)->create($this->paris);
+        factory(Connection::class)->create($this->barcelonaToParis);
+        factory(Connection::class)->create($this->parisToBarcelona);
+
+        $this->addFakeJsonResponse(['duration' => 60]);
+        $this->addFakeJsonResponse(['duration' => 90]);
+
+        $this->artisan('connections:find --country=ES --country=FR')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $barcelonaToParis = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+        $parisToBarcelona = Connection::query()->where('starting_station', '=', $this->paris['station_id'])->first();
+
+        $this->assertEquals(60, $barcelonaToParis->duration);
+        $this->assertEquals(90, $parisToBarcelona->duration);
     }
     
     // TODO: Test logs
