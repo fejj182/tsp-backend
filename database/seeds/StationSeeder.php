@@ -29,7 +29,8 @@ class StationSeeder extends Seeder
                     'lng' => round(floatval($row[4]), 6),
                     'country' => $row[5],
                     'enabled' => false,
-                    'important' => $row[6]
+                    'important' => $row[6],
+                    'connected_countries' => $row[7] != "" ? $row[7] : null 
                 ]);
             }
         }

@@ -8,19 +8,21 @@ use Ramsey\Uuid\Uuid;
  * @property string $id
  * @property int $station_id
  * @property string $name
+ * @property string $slug
  * @property string $lat
  * @property string $lng
  * @property int $enabled
  * @property string $country
  * @property boolean $important
  * @property int $captured_by
+ * @property string $country
  */
 class Station extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'stations';
-    protected $hidden = ['station_id', 'enabled', 'country', 'distance', 'important', 'captured_by'];
+    protected $hidden = ['station_id', 'enabled', 'country', 'distance', 'important', 'captured_by', 'connected_countries'];
     protected $fillable = ['station_id', 'name', 'slug', 'lat', 'lng', 'enabled', 'country', 'important', 'captured_by'];
 
     protected static function boot()
