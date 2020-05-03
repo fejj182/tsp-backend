@@ -44,10 +44,19 @@ class ConnectionBuilder extends Command
         $isCrossCountry = $this->option('xc');
         $countries = $this->option('country');
 
-        $stations = $this->getStationsToBuild($countries, $isCrossCountry);
+        $stations = $this->getStartingStationsToBuild($countries, $isCrossCountry);
 
-        $stations->each(function ($startingStation) use ($stations) {
-            $stations->each(function ($endingStation) use ($startingStation) {
+        $stations->each(function ($startingStation) use ($stations, $isCrossCountry) {
+
+            if ($isCrossCountry) {
+                $endingStations = $stations->filter(function($station) use ($startingStation) {
+                    return strpos($station->connected_countries, $startingStation->country) !== false;
+                });
+            } else {
+                $endingStations = $stations;
+            }
+
+            $endingStations->each(function ($endingStation) use ($startingStation) {
                 if ($startingStation != $endingStation) {
                     $connection = Connection::firstOrCreate([
                         'starting_station' => $startingStation->station_id,
@@ -63,7 +72,7 @@ class ConnectionBuilder extends Command
         $this->info('Finished');
     }
 
-    protected function getStationsToBuild(array $countries, bool $isCrossCountry): Collection
+    protected function getStartingStationsToBuild(array $countries, bool $isCrossCountry): Collection
     {
         if ($isCrossCountry) {
             $stationsQuery = Station::where('important', true)

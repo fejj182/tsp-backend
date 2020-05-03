@@ -193,4 +193,24 @@ class ConnectionBuilderTest extends TestCase
         $this->assertEquals(1, count($connectionsFR));
         $this->assertEmpty(count($connectionsDE));
     }
+
+    public function testConnectionBuilderCrossCountryOnlyBuildCountriesDirectlyConnected()
+    {
+        $stationES = factory(Station::class)->create(['country' => 'ES', 'connected_countries' => 'FR']);
+        $stationFR = factory(Station::class)->create(['country' => 'FR','connected_countries' => 'PT']);
+        $stationPT = factory(Station::class)->create(['country' => 'PT', 'connected_countries' => 'ES']);
+
+        $this->artisan('connections:build --country=ES --country=FR --country=PT --xc');
+
+        $connectionsES = Connection::query()->where('starting_station', '=', $stationES->station_id)->get();
+        $connectionsFR = Connection::query()->where('starting_station', '=', $stationFR->station_id)->get();
+        $connectionsPT = Connection::query()->where('starting_station', '=', $stationPT->station_id)->get();
+
+        $this->assertEquals(1, count($connectionsES));
+        $this->assertEquals(1, count($connectionsFR));
+        $this->assertEquals(1, count($connectionsPT));
+        $this->assertEquals($stationPT->station_id, $connectionsES[0]->ending_station);
+        $this->assertEquals($stationES->station_id, $connectionsFR[0]->ending_station);
+        $this->assertEquals($stationFR->station_id, $connectionsPT[0]->ending_station);
+    }
 }
