@@ -41,17 +41,19 @@ class ConnectionBuilder extends Command
     public function handle()
     {
         $stations = Station::where('important', '=', true)
-        ->whereIn('country', $this->option('country'))
-        ->get();
+            ->whereIn('country', $this->option('country'))
+            ->get();
 
-        $stations->each(function($startingStation) use ($stations) {
-            $stations->each(function($endingStation) use ($startingStation) {
+        $stations->each(function ($startingStation) use ($stations) {
+            $stations->each(function ($endingStation) use ($startingStation) {
                 if ($startingStation != $endingStation) {
                     $connection = Connection::firstOrCreate([
                         'starting_station' => $startingStation->station_id,
                         'ending_station' => $endingStation->station_id
                     ]);
-                    Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
+                    if ($connection->wasRecentlyCreated) {
+                        Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
+                    }
                 }
             });
         });
