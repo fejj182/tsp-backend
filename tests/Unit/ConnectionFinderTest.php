@@ -71,8 +71,8 @@ class ConnectionFinderTest extends TestCase
         $this->assertEquals(90, $valenciaToBarcelona->duration);
 
         $this->assertGuzzleCalledTimes(2);
-        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456");
-        $this->assertGuzzleCalledWithUrl("mockHost/journeys/456/123");
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456/duration");
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/456/123/duration");
     }
 
     public function testFinderCommandShouldFailedResponse()
@@ -93,7 +93,7 @@ class ConnectionFinderTest extends TestCase
         $this->assertNull($valenciaToBarcelona->duration);
         
         $this->assertGuzzleCalledTimes(1);
-        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456");
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456/duration");
     }
 
     public function testFinderCommandShouldNotCallApiIfDurationHasNotExpired()

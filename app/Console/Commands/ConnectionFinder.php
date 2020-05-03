@@ -78,7 +78,7 @@ class ConnectionFinder extends Command
 
     protected function updateConnection($connection)
     {
-        $result = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}");
+        $result = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}/duration");
 
         $duration = $result->duration;
         $connection->duration = $duration;
