@@ -15,7 +15,7 @@ class ConnectionBuilder extends Command
      *
      * @var string
      */
-    protected $signature = 'connections:build {--country=*} {--xc}';
+    protected $signature = 'connections:build {--country=*}';
 
     /**
      * The console command description.
@@ -41,56 +41,64 @@ class ConnectionBuilder extends Command
      */
     public function handle()
     {
-        $isCrossCountry = $this->option('xc');
         $countries = $this->option('country');
 
-        $stations = $this->getStartingStationsToBuild($countries, $isCrossCountry);
-
-        $stations->each(function ($startingStation) use ($stations, $isCrossCountry) {
-
-            if ($isCrossCountry) {
-                $endingStations = $stations->filter(function($station) use ($startingStation) {
-                    return strpos($station->connected_countries, $startingStation->country) !== false;
-                });
-            } else {
-                $endingStations = $stations;
-            }
-
-            $endingStations->each(function ($endingStation) use ($startingStation) {
-                if ($startingStation != $endingStation) {
-                    $connection = Connection::firstOrCreate([
-                        'starting_station' => $startingStation->station_id,
-                        'ending_station' => $endingStation->station_id
-                    ]);
-                    if ($connection->wasRecentlyCreated) {
-                        Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
-                    }
-                }
-            });
-        });
+        if (count($countries) == 1) {
+            $this->regularBuilder($countries);
+        } else if (count($countries) > 1) {
+            $this->crossCountryBuilder($countries);
+        }
 
         $this->info('Finished');
     }
 
-    protected function getStartingStationsToBuild(array $countries, bool $isCrossCountry): Collection
+    protected function regularBuilder(array $countries)
     {
-        if ($isCrossCountry) {
-            $stationsQuery = Station::where('important', true)
-                ->whereIn('country', $countries);
+        $stations = Station::where('important', true)
+            ->whereIn('country', $countries)
+            ->get();
 
-            $firstCountry = array_shift($countries);
+        $stations->each(function ($startingStation) use ($stations) {
+            $this->buildConnections($stations, $startingStation);
+        });
+    }
 
-            $stationsQuery->where(function ($query) use ($countries, $firstCountry) {
-                $query->where('connected_countries', $firstCountry);
-                foreach ($countries as $country) {
-                    $query->orWhere('connected_countries', 'LIKE', '%' . $country . '%');
+    protected function buildConnections($stations, $startingStation)
+    {
+        $stations->each(function ($endingStation) use ($startingStation) {
+            if ($startingStation != $endingStation) {
+                $connection = Connection::firstOrCreate([
+                    'starting_station' => $startingStation->station_id,
+                    'ending_station' => $endingStation->station_id
+                ]);
+                if ($connection->wasRecentlyCreated) {
+                    Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);
                 }
-            });
-        } else {
-            $stationsQuery = Station::where('important', true)
-                ->whereIn('country', $countries);
-        }
+            }
+        });
+    }
 
-        return $stationsQuery->get();
+    protected function crossCountryBuilder(array $countries)
+    {
+        $stationsQuery = Station::where('important', true)
+            ->whereIn('country', $countries);
+
+        $firstCountry = array_shift($countries);
+
+        $stations = $stationsQuery->where(function ($query) use ($countries, $firstCountry) {
+            $query->where('connected_countries', 'LIKE', '%' . $firstCountry . '%');
+            foreach ($countries as $country) {
+                $query->orWhere('connected_countries', 'LIKE', '%' . $country . '%');
+            }
+        })
+            ->get();
+
+        $stations->each(function ($startingStation) use ($stations) {
+            $endingStations = $stations->filter(function ($station) use ($startingStation) {
+                return strpos($station->connected_countries, $startingStation->country) !== false;
+            });
+
+            $this->buildConnections($endingStations, $startingStation);
+        });
     }
 }
