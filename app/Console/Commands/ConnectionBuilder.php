@@ -44,7 +44,7 @@ class ConnectionBuilder extends Command
 
         if ($isCrossCountry) {
             $stations = Station::where('important', true)
-            ->whereNotNull('connected_countries')
+            ->whereIn('connected_countries', $this->option('country'))
             ->whereIn('country', $this->option('country'))
             ->get();
         } else {
