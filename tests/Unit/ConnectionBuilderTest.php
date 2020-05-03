@@ -129,22 +129,21 @@ class ConnectionBuilderTest extends TestCase
 
         $this->artisan('connections:build --country=ES --country=FR --xc');
 
-        $connectionsES = Connection::query()->where('starting_station', '=', $firstStationES->station_id)->get();
-        $this->assertEquals(1, count($connectionsES));
-        $this->assertEquals($stationFR->station_id, $connectionsES[0]->ending_station);
+        $firstConnectionsES = Connection::query()->where('starting_station', '=', $firstStationES->station_id)->get();
+        $this->assertEquals(1, count($firstConnectionsES));
+        $this->assertEquals($stationFR->station_id, $firstConnectionsES[0]->ending_station);
 
         $connectionsFR = Connection::query()->where('starting_station', '=', $stationFR->station_id)->get();
         $this->assertEquals(1, count($connectionsFR));
         $this->assertEquals($firstStationES->station_id, $connectionsFR[0]->ending_station);
 
-        $madridConnections = Connection::query()->where('starting_station', '=', $secondStationES->station_id)->get();
-        $this->assertEmpty($madridConnections);
+        $secondConnectionsES = Connection::query()->where('starting_station', '=', $secondStationES->station_id)->get();
+        $this->assertEmpty($secondConnectionsES);
     }
 
-    public function testConnectionBuilderCrossCountryOnlyCountryOptionsProvided()
+    public function testConnectionBuilderStationWithMultipleConnectedCountries()
     {
-        $firstStationES = factory(Station::class)->create(['country' => 'ES', 'connected_countries' => 'FR']);
-        $secondStationES = factory(Station::class)->create(['country' => 'ES','connected_countries' => 'PT']);
+        $firstStationES = factory(Station::class)->create(['country' => 'ES', 'connected_countries' => 'FR,PT']);
         $stationFR = factory(Station::class)->create(['country' => 'FR', 'connected_countries' => 'ES']);
 
         $this->artisan('connections:build --country=ES --country=FR --xc');
@@ -156,8 +155,42 @@ class ConnectionBuilderTest extends TestCase
         $connectionsFR = Connection::query()->where('starting_station', '=', $stationFR->station_id)->get();
         $this->assertEquals(1, count($connectionsFR));
         $this->assertEquals($firstStationES->station_id, $connectionsFR[0]->ending_station);
+    }
 
-        $salamancaConnections = Connection::query()->where('starting_station', '=', $secondStationES->station_id)->get();
-        $this->assertEmpty($salamancaConnections);
+    public function testConnectionBuilderCrossCountryOnlyCountryOptionsProvided()
+    {
+        $firstStationES = factory(Station::class)->create(['country' => 'ES', 'connected_countries' => 'FR']);
+        $secondStationES = factory(Station::class)->create(['country' => 'ES','connected_countries' => 'PT']);
+        $stationFR = factory(Station::class)->create(['country' => 'FR', 'connected_countries' => 'ES']);
+
+        $this->artisan('connections:build --country=ES --country=FR --xc');
+
+        $firstConnectionsES = Connection::query()->where('starting_station', '=', $firstStationES->station_id)->get();
+        $this->assertEquals(1, count($firstConnectionsES));
+        $this->assertEquals($stationFR->station_id, $firstConnectionsES[0]->ending_station);
+
+        $connectionsFR = Connection::query()->where('starting_station', '=', $stationFR->station_id)->get();
+        $this->assertEquals(1, count($connectionsFR));
+        $this->assertEquals($firstStationES->station_id, $connectionsFR[0]->ending_station);
+
+        $secondConnectionsES = Connection::query()->where('starting_station', '=', $secondStationES->station_id)->get();
+        $this->assertEmpty($secondConnectionsES);
+    }
+
+    public function testConnectionBuilderOnlyBuildsCrossCountryConnectionsForIncludedCountry()
+    {
+        $firstStationES = factory(Station::class)->create(['country' => 'ES', 'connected_countries' => 'FR']);
+        $stationFR = factory(Station::class)->create(['country' => 'FR', 'connected_countries' => 'ES']);
+        $stationDE = factory(Station::class)->create(['country' => 'DE', 'connected_countries' => 'FR']);
+
+        $this->artisan('connections:build --country=ES --country=FR --xc');
+
+        $connectionsES = Connection::query()->where('starting_station', '=', $firstStationES->station_id)->get();
+        $connectionsFR = Connection::query()->where('starting_station', '=', $stationFR->station_id)->get();
+        $connectionsDE = Connection::query()->where('starting_station', '=', $stationDE->station_id)->get();
+
+        $this->assertEquals(1, count($connectionsES));
+        $this->assertEquals(1, count($connectionsFR));
+        $this->assertEmpty(count($connectionsDE));
     }
 }

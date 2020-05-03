@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Connection;
 use App\Models\Station;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Log;
 
 class ConnectionBuilder extends Command
@@ -41,18 +42,9 @@ class ConnectionBuilder extends Command
     public function handle()
     {
         $isCrossCountry = $this->option('xc');
+        $countries = $this->option('country');
 
-        if ($isCrossCountry) {
-            $stations = Station::where('important', true)
-            ->whereIn('connected_countries', $this->option('country'))
-            ->whereIn('country', $this->option('country'))
-            ->get();
-        } else {
-            $stations = Station::where('important', true)
-                ->whereIn('country', $this->option('country'))
-                ->get();
-        }
-
+        $stations = $this->getStationsToBuild($countries, $isCrossCountry);
 
         $stations->each(function ($startingStation) use ($stations) {
             $stations->each(function ($endingStation) use ($startingStation) {
@@ -69,5 +61,27 @@ class ConnectionBuilder extends Command
         });
 
         $this->info('Finished');
+    }
+
+    protected function getStationsToBuild(array $countries, bool $isCrossCountry): Collection
+    {
+        if ($isCrossCountry) {
+            $stationsQuery = Station::where('important', true)
+                ->whereIn('country', $countries);
+
+            $firstCountry = array_shift($countries);
+
+            $stationsQuery->where(function ($query) use ($countries, $firstCountry) {
+                $query->where('connected_countries', $firstCountry);
+                foreach ($countries as $country) {
+                    $query->orWhere('connected_countries', 'LIKE', '%' . $country . '%');
+                }
+            });
+        } else {
+            $stationsQuery = Station::where('important', true)
+                ->whereIn('country', $countries);
+        }
+
+        return $stationsQuery->get();
     }
 }
