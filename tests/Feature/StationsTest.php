@@ -52,6 +52,16 @@ class StationsTest extends TestCase
             'ending_station' => $endingStation->station_id,
             'duration' => 123
         ]);
+        factory(Connection::class)->create([
+            'starting_station' => $startingStation->station_id,
+            'ending_station' => factory(Station::class)->create()->station_id,
+            'duration' => 0
+        ]);
+        factory(Connection::class)->create([
+            'starting_station' => $startingStation->station_id,
+            'ending_station' => factory(Station::class)->create(['enabled' => false])->station_id,
+            'duration' => 123
+        ]);
 
         $response = $this->post('/api/stations/connections',  ['stationId' => $startingStation->id]);
 

@@ -44,7 +44,9 @@ class StationController extends Controller
             ->get();
 
         $connections->each(function ($connection) use ($result) {
-            $endingStation = Station::query()->where('station_id', '=', $connection->ending_station)->first();
+            $endingStation = Station::query()
+                ->where([['station_id', '=', $connection->ending_station], ['enabled', true]])
+                ->first();
             if ($endingStation != null) {
                 $endingStation->duration = $connection->duration;
                 $result->push($endingStation);
