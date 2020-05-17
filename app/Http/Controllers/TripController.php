@@ -13,6 +13,11 @@ class TripController extends Controller
     public function create(Request $request): array
     {
         $tripInput = $request->input('trip');
+
+        foreach($tripInput as $index => $station) {
+            Station::where('id', $station["id"])->firstOrFail();
+        }
+
         $trip = Trip::create();
         foreach($tripInput as $index => $station) {
             TripStop::create(['trip_id' => $trip->id, 'station_id' => $station["id"], 'position' => $index]);
