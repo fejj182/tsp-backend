@@ -39,7 +39,20 @@ class DestinationController extends Controller
                 if ($endingStation != null) {
                     $endingDestination = Destination::query()->where('id', $endingStation->destination_id)->first();
                     $endingDestination->duration = $connection->duration;
-                    $result->push($endingDestination);
+
+                    $destinationIdsEqual = function ($value) use ($endingDestination) {
+                        return $value->id == $endingDestination->id;
+                    };
+                    
+                    $indexOrFalse = $result->search($destinationIdsEqual);
+                    if ($indexOrFalse === false) {
+                        $result->push($endingDestination);
+                    } else {
+                        $existingResult = $result->get($indexOrFalse);
+                        if ($existingResult->duration > $endingDestination->duration) {
+                            $existingResult->duration = $endingDestination->duration;
+                        }
+                    }
                 }
             });
         }

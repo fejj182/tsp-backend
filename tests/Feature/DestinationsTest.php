@@ -6,7 +6,6 @@ use App\Models\Connection;
 use App\Models\Destination;
 use App\Models\Station;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
 class DestinationsTest extends TestCase
@@ -92,6 +91,68 @@ class DestinationsTest extends TestCase
 
         $endingDifferentDestination->duration = $connectionDifferent->duration;
         $result->push($endingDifferentDestination);
+
+        $response->assertExactJson($result->toArray());
+    }
+
+    public function testDestinationWithMultipleStationsThatHaveTheSameConnection()
+    {
+        $startingDestination = factory(Destination::class)->create();
+        $startingStation = factory(Station::class)->create(['destination_id' => $startingDestination->id]);
+        $startingStationSameDestination = factory(Station::class)->create(['destination_id' => $startingDestination->id]);
+
+        $endingDestination = factory(Destination::class)->create();
+        $endingStation = factory(Station::class)->create(['destination_id' => $endingDestination->id]);
+
+        $connection = factory(Connection::class)->create([
+            'starting_station' => $startingStation->station_id,
+            'ending_station' => $endingStation->station_id,
+            'duration' => 123
+        ]);
+        factory(Connection::class)->create([
+            'starting_station' => $startingStationSameDestination->station_id,
+            'ending_station' => $endingStation->station_id,
+            'duration' => 123
+        ]);
+        
+
+        $response = $this->post('/api/destinations/connections',  ['destinationId' => $startingDestination->id]);
+
+        $result = collect([]);
+        
+        $endingDestination->duration = $connection->duration;
+        $result->push($endingDestination);
+
+        $response->assertExactJson($result->toArray());
+    }
+
+    public function testDestinationWithMultipleStationsThatHaveTheSameConnectionReturnsSmallerDuration()
+    {
+        $startingDestination = factory(Destination::class)->create();
+        $startingStation = factory(Station::class)->create(['destination_id' => $startingDestination->id]);
+        $startingStationSameDestination = factory(Station::class)->create(['destination_id' => $startingDestination->id]);
+
+        $endingDestination = factory(Destination::class)->create();
+        $endingStation = factory(Station::class)->create(['destination_id' => $endingDestination->id]);
+
+        $connection = factory(Connection::class)->create([
+            'starting_station' => $startingStation->station_id,
+            'ending_station' => $endingStation->station_id,
+            'duration' => 123
+        ]);
+        factory(Connection::class)->create([
+            'starting_station' => $startingStationSameDestination->station_id,
+            'ending_station' => $endingStation->station_id,
+            'duration' => 124
+        ]);
+        
+
+        $response = $this->post('/api/destinations/connections',  ['destinationId' => $startingDestination->id]);
+
+        $result = collect([]);
+        
+        $endingDestination->duration = $connection->duration;
+        $result->push($endingDestination);
 
         $response->assertExactJson($result->toArray());
     }
