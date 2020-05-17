@@ -16,13 +16,14 @@ use Ramsey\Uuid\Uuid;
  * @property boolean $important
  * @property int $captured_by
  * @property string $country
+ * @property string $destination_id
  */
 class Station extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
     protected $table = 'stations';
-    protected $hidden = ['station_id', 'enabled', 'country', 'distance', 'important', 'captured_by', 'connected_countries'];
+    protected $hidden = ['station_id', 'enabled', 'country', 'distance', 'important', 'captured_by', 'connected_countries', 'destination_id'];
     protected $fillable = ['station_id', 'name', 'slug', 'lat', 'lng', 'enabled', 'country', 'important', 'captured_by'];
 
     protected static function boot()
