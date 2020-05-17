@@ -20,4 +20,9 @@ class Destination extends Model
             }
         });
     }
+
+    public function stations()
+    {
+        return $this->hasMany('App\Models\Station');
+    }
 }

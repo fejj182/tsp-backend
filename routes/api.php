@@ -21,6 +21,8 @@ Route::post('/stations/connections', 'StationController@connections');
 
 Route::get('/destinations', 'DestinationController@enabled');
 
+Route::post('/destinations/connections', 'DestinationController@connections');
+
 Route::post('/trip', 'TripController@create');
 
 Route::get('/trip/{alias}', 'TripController@get');
