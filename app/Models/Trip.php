@@ -32,4 +32,9 @@ class Trip extends Model
     {
         return $this->hasMany('App\Models\TripStop');
     }
+
+    public function tripDestinations()
+    {
+        return $this->hasMany('App\Models\TripDestination');
+    }
 }

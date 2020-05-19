@@ -28,3 +28,9 @@ Route::post('/trip', 'TripController@create');
 Route::get('/trip/{alias}', 'TripController@get');
 
 Route::post('/trip/{alias}', 'TripController@update');
+
+Route::post('/trip-destinations', 'TripControllerV2@create');
+
+Route::get('/trip-destinations/{alias}', 'TripControllerV2@get');
+
+Route::post('/trip-destinations/{alias}', 'TripControllerV2@update');

@@ -9,7 +9,8 @@ class Destination extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
-
+    protected $hidden = ['country'];
+    
     protected static function boot()
     {
         parent::boot();
