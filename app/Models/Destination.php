@@ -5,12 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @property string $id
+ * @property string $name
+ * @property string $slug
+ * @property float $lat
+ * @property float $lng
+ * @property string $country
+ */
 class Destination extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
     protected $hidden = ['country'];
-    
+
     protected static function boot()
     {
         parent::boot();
