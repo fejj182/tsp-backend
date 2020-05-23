@@ -19,7 +19,7 @@ class TripControllerV2 extends Controller
 
         $trip = Trip::create();
         foreach($tripInput as $index => $destination) {
-            TripDestination::create(['trip_id' => $trip->id, 'destination_id' => $destination["id"], 'position' => $index]);
+            TripDestination::create(['trip_id' => $trip->id, 'destination_slug' => $destination["slug"], 'position' => $index]);
         }
         return ["alias" => $trip->alias];
     }
@@ -32,11 +32,11 @@ class TripControllerV2 extends Controller
             abort(404);
         }
 
-        $destinationIds = $trip->tripDestinations()->pluck('destination_id');
+        $destinationIds = $trip->tripDestinations()->pluck('destination_slug');
         $response = [];
 
         foreach($destinationIds as $id) {
-            $nextDestination = Destination::where('id', $id)->first();
+            $nextDestination = Destination::where('slug', $id)->first();
             $response[] = $nextDestination;
         }
 
@@ -49,7 +49,7 @@ class TripControllerV2 extends Controller
         $trip = Trip::where('alias', $alias)->first();
         TripDestination::where('trip_id', $trip->id)->delete();
         foreach($tripInput as $index => $destination) {
-            TripDestination::create(['trip_id' => $trip->id, 'destination_id' => $destination["id"], 'position' => $index]);
+            TripDestination::create(['trip_id' => $trip->id, 'destination_slug' => $destination["slug"], 'position' => $index]);
         }
         return 'success';
     }

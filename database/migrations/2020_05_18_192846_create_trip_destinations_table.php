@@ -16,7 +16,7 @@ class CreateTripDestinationsTable extends Migration
         Schema::create('trip_destinations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('trip_id');
-            $table->uuid('destination_id');
+            $table->char('destination_slug');
             $table->smallInteger('position');
         });
     }

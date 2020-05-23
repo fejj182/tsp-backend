@@ -16,8 +16,8 @@ class TripsV2Test extends TestCase
     {
         parent::setUp();
 
-        $this->firstStop = $this->getStationJson();
-        $this->secondStop = $this->getStationJson();
+        $this->firstStop = $this->getDestinationJson();
+        $this->secondStop = $this->getDestinationJson();
 
         // note: creating this way to ensure property order in assertExactJson
         $this->startingDestination = factory(Destination::class)->create($this->firstStop);
@@ -34,7 +34,7 @@ class TripsV2Test extends TestCase
 
     public function testTripNotCreatedIfDestinationDoesNotExist()
     {
-        $notExistingDestination = $this->getStationJson();
+        $notExistingDestination = $this->getDestinationJson();
         $response = $this->post('/api/trip-destinations', ["trip" => array($notExistingDestination, $this->secondStop)]);
         $response->assertStatus(404);
     }
@@ -44,12 +44,12 @@ class TripsV2Test extends TestCase
         $this->post('/api/trip-destinations', ["trip" => array($this->firstStop, $this->secondStop)]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->firstStop['id'],
+            'destination_slug' => $this->firstStop['slug'],
             'position' => 0
         ]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->secondStop['id'],
+            'destination_slug' => $this->secondStop['slug'],
             'position' => 1
         ]);
     }
@@ -78,28 +78,28 @@ class TripsV2Test extends TestCase
 
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->secondStop['id'],
+            'destination_slug' => $this->secondStop['slug'],
             'position' => 0
         ]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->firstStop['id'],
+            'destination_slug' => $this->firstStop['slug'],
             'position' => 1
         ]);
 
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->firstStop['id'],
+            'destination_slug' => $this->firstStop['slug'],
             'position' => 0
         ]);
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
-            'destination_id' => $this->secondStop['id'],
+            'destination_slug' => $this->secondStop['slug'],
             'position' => 1
         ]);
     }
 
-    protected function getStationJson(): array
+    protected function getDestinationJson(): array
     {
         $faker = Factory::create();
         return [
