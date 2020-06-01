@@ -40,7 +40,7 @@ class ConnectionFinder extends Command
         $this->client = $client;
         $this->host = env('CONNECTION_COMMAND_HOST');
 
-        $this->durationNotExpired = function ($query) {
+        $this->outOfDate = function ($query) {
             $days = $this->option('days');
             $query->where('updated_at', '<=', Carbon::now()->subDays($days))
                 ->orWhereNull('duration');
@@ -62,7 +62,7 @@ class ConnectionFinder extends Command
             $stations->each(function ($station) {
                 $connections = Connection::query()
                     ->where('starting_station', '=', $station->station_id)
-                    ->where($this->durationNotExpired)
+                    ->where($this->outOfDate)
                     ->get();
                 $connections->each(function ($connection) {
                     $this->updateConnection($connection);
