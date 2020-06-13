@@ -81,8 +81,12 @@ class ConnectionFinder extends Command
         $result = $this->get("{$this->host}/journeys/{$connection->starting_station}/{$connection->ending_station}/duration");
 
         $duration = $result->duration;
-        $connection->duration = $duration;
-        $connection->save();
+        if ($connection->duration != $duration) {
+            $connection->duration = $duration;
+            $connection->save();
+        } else {
+            $connection->touch();
+        }
 
         if ($duration > 0) {
             Log::info($connection->starting_station . "-" . $connection->ending_station . " update time: " . $connection->updated_at);

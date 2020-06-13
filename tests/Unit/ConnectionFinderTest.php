@@ -2,6 +2,7 @@
 
 use App\Models\Connection;
 use App\Models\Station;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use Tests\Concerns\FakeRequests;
@@ -73,6 +74,34 @@ class ConnectionFinderTest extends TestCase
         $this->assertGuzzleCalledTimes(2);
         $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456/duration");
         $this->assertGuzzleCalledWithUrl("mockHost/journeys/456/123/duration");
+    }
+
+    public function testFinderCommand_shouldUpdateTimestampIfDurationTheSame()
+    {
+        $yesterday = Carbon::now()->subDay();
+        $this->barcelonaToValencia = [
+            'starting_station' => 123,
+            'ending_station' => 456,
+            'duration' => 120,
+            'updated_at' => $yesterday
+        ];
+
+        $this->createStationsAndConnections();        
+
+        $this->addFakeJsonResponse(['duration' => 120]);
+        $this->addFakeJsonResponse(['duration' => 0]);
+
+        $this->artisan('connections:find --country=ES')
+            ->expectsOutput('Finished')
+            ->assertExitCode(0);
+
+        $barcelonaToValencia = Connection::query()->where('starting_station', '=', $this->barcelona['station_id'])->first();
+
+        $this->assertEquals(120, $barcelonaToValencia->duration);
+        $this->assertTrue($barcelonaToValencia->updated_at > $yesterday);
+
+        $this->assertGuzzleCalledTimes(2);
+        $this->assertGuzzleCalledWithUrl("mockHost/journeys/123/456/duration");
     }
 
     public function testFinderCommandShouldFailedResponse()
