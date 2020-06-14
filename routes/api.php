@@ -13,12 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('/stations', 'StationController@enabled');
-
-Route::post('/stations/nearest', 'StationController@nearest');
-
-Route::post('/stations/connections', 'StationController@connections');
-
 Route::get('/destinations', 'DestinationController@enabled');
 
 Route::post('/destinations/connections', 'DestinationController@connections');
@@ -28,3 +22,9 @@ Route::post('/trip', 'TripController@create');
 Route::get('/trip/{alias}', 'TripController@get');
 
 Route::post('/trip/{alias}', 'TripController@update');
+
+// <deprecated>
+Route::get('/stations', 'StationController@enabled');
+Route::post('/stations/nearest', 'StationController@nearest');
+Route::post('/stations/connections', 'StationController@connections');
+// </deprecated>
