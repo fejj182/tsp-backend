@@ -30,4 +30,10 @@ class StationRepository
     ->orderBy('distance', 'asc')
     ->first();
   }
+
+  public function findOneByStationId(int $stationId): Station
+  {
+    return Station::where([['station_id', '=', $stationId], ['enabled', true]])
+    ->firstOrFail();
+  }
 }

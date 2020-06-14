@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Connection;
 use App\Models\Destination;
 use App\Models\Station;
 use App\Repositories\ConnectionRepository;
+use App\Repositories\StationRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class DestinationController extends Controller
 {
-    private $connectionRepository;
+    protected $connectionRepository;
+    protected $stationRepository;
 
-    public function __construct(ConnectionRepository $connectionRepository)
-    {
+    public function __construct(
+        ConnectionRepository $connectionRepository,
+        StationRepository $stationRepository
+    ) {
         $this->connectionRepository = $connectionRepository;
+        $this->stationRepository = $stationRepository;
     }
 
     public function enabled(): Collection
@@ -33,10 +37,8 @@ class DestinationController extends Controller
             
             $startingStation = Station::where('id', $station->id)->first();
             $connections = $this->connectionRepository->findByStartingStationId($startingStation->station_id);
-
             $connections->each(function ($connection) use ($result) {
-                $endingStation = Station::where([['station_id', '=', $connection->ending_station], ['enabled', true]])
-                    ->first();
+                $endingStation = $this->stationRepository->findOneByStationId($connection->ending_station);
                 if ($endingStation != null) {
                     $endingDestination = Destination::where('id', $endingStation->destination_id)->first();
                     $endingDestination->duration = $connection->duration;

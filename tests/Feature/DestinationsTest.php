@@ -27,7 +27,7 @@ class DestinationsTest extends TestCase
         $response->assertExactJson([$station->toArray(), $station2->toArray()]);
     }
 
-    public function testDestination()
+    public function testDestinationConnections()
     {
         $startingDestination = factory(Destination::class)->create();
         $startingStation = factory(Station::class)->create(['destination_id' => $startingDestination->id]);
@@ -38,16 +38,6 @@ class DestinationsTest extends TestCase
         $connection = factory(Connection::class)->create([
             'starting_station' => $startingStation->station_id,
             'ending_station' => $endingStation->station_id,
-            'duration' => 123
-        ]);
-        factory(Connection::class)->create([
-            'starting_station' => $startingStation->station_id,
-            'ending_station' => factory(Station::class)->create()->station_id,
-            'duration' => 0
-        ]);
-        factory(Connection::class)->create([
-            'starting_station' => $startingStation->station_id,
-            'ending_station' => factory(Station::class)->create(['enabled' => false])->station_id,
             'duration' => 123
         ]);
 
