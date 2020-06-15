@@ -24,7 +24,7 @@ class Station extends Model
     public $incrementing = false;
     protected $table = 'stations';
     protected $hidden = ['station_id', 'enabled', 'country', 'distance', 'important', 'captured_by', 'connected_countries', 'destination_id'];
-    protected $fillable = ['station_id', 'name', 'slug', 'lat', 'lng', 'enabled', 'country', 'important', 'captured_by'];
+    protected $fillable = ['station_id', 'name', 'slug', 'lat', 'lng', 'enabled', 'country', 'important', 'captured_by', 'destination_id'];
 
     protected static function boot()
     {
@@ -35,5 +35,10 @@ class Station extends Model
                 $station->{$station->getKeyName()} = (string) Uuid::uuid4();
             }
         });
+    }
+
+    public function connections()
+    {
+        return $this->hasMany('App\Models\Connection', 'starting_station', 'station_id');
     }
 }

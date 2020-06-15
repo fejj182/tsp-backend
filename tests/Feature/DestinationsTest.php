@@ -19,12 +19,25 @@ class DestinationsTest extends TestCase
 
     public function testDestinationsEnabled()
     {
-        $station = factory(Destination::class)->create();
-        $station2 = factory(Destination::class)->create();
+        $destination = factory(Destination::class)->create();
+        $station = factory(Station::class)->create(['destination_id' => $destination->id]);
+        factory(Connection::class)->create(['starting_station' => $station->station_id, 'duration' => 100]);
+        
+        $destination2 = factory(Destination::class)->create();
+        $station2 = factory(Station::class)->create(['destination_id' => $destination2->id]);
+        factory(Connection::class)->create(['starting_station' => $station2->station_id, 'duration' => 100]);
+
+        $destination3 = factory(Destination::class)->create();
+        factory(Station::class)->create(['destination_id' => $destination3->id]);
+        factory(Connection::class)->create(['duration' => 100]);
+        
+        $destination4 = factory(Destination::class)->create();
+        $station4 = factory(Station::class)->create(['destination_id' => $destination4->id]);
+        factory(Connection::class)->create(['starting_station' => $station4->station_id, 'duration' => 0]);
 
         $response = $this->get('/api/destinations');
 
-        $response->assertExactJson([$station->toArray(), $station2->toArray()]);
+        $response->assertExactJson([$destination->toArray(), $destination2->toArray()]);
     }
 
     public function testDestinationConnections()

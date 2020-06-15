@@ -6,6 +6,7 @@ use App\Models\Destination;
 use App\Models\Station;
 use App\Repositories\ConnectionRepository;
 use App\Repositories\StationRepository;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
@@ -24,18 +25,20 @@ class DestinationController extends Controller
 
     public function enabled(): Collection
     {
-        return Destination::all();
+        return Destination::whereHas('stations.connections', function (Builder $query) {
+            $query->where('duration', '>', 0);
+        })->get();
     }
 
     public function connections(Request $request)
     {
         $destinationId = $request->input('destinationId');
-        $startingDestination = Destination::query()->where('id', $destinationId)->first();
+        $startingDestination = Destination::where('id', $destinationId)->first();
 
         $result = collect([]);
         foreach ($startingDestination->stations as $station) {
             
-            $startingStation = Station::where('id', $station->id)->first();
+            $startingStation = $this->stationRepository->findOneByStationId($station->station_id);
             $connections = $this->connectionRepository->findByStartingStationId($startingStation->station_id);
             $connections->each(function ($connection) use ($result) {
                 $endingStation = $this->stationRepository->findOneByStationId($connection->ending_station);

@@ -17,7 +17,7 @@ class Destination extends Model
 {
     public $timestamps = false;
     public $incrementing = false;
-    protected $hidden = ['country'];
+    protected $hidden = ['country', 'stations'];
 
     protected static function boot()
     {
