@@ -22,7 +22,7 @@ return [
         'allow_origins' => [
             'https://afternoon-citadel-44487.herokuapp.com',
             'https://compassionate-kalam-c86cc7.netlify.com',
-            'https://*--compassionate-kalam-c86cc7.netlify.app/',
+            'https://*--compassionate-kalam-c86cc7.netlify.app',
             'https://trainspotter.co',
             'http://localhost:8080'
             //TODO: is this a security problem?
