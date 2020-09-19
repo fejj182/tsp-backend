@@ -4,6 +4,7 @@ namespace App\Http;
 
 use Exception;
 use GuzzleHttp\Exception\RequestException;
+use Inspector;
 
 trait MakesHttpRequests
 {
@@ -37,6 +38,7 @@ trait MakesHttpRequests
                 $message .= " ({$e->getMessage()})";
             }
 
+            Inspector::reportException($e);
             throw new Exception($message, 0, $e);
         }
 
