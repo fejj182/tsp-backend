@@ -12,6 +12,7 @@
         "fideloper/proxy": "^4.0",
         "google/apiclient": "^2.0",
         "guzzlehttp/guzzle": "~6.0",
+        "inspector-apm/inspector-laravel": "^4.5",
         "laravel/framework": "6.3",
         "laravel/tinker": "^1.0",
         "ramsey/uuid": "^3.9",
