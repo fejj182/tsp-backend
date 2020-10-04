@@ -2,7 +2,6 @@
 
 use App\Models\Destination;
 use App\Models\Trip;
-use Faker\Factory;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
@@ -105,12 +104,11 @@ class TripsTest extends TestCase
 
     protected function getDestinationJson(): array
     {
-        $faker = Factory::create();
         return [
             'id' => (string) Uuid::uuid4(),
-            'name' => $faker->city,
-            'lat' => $faker->latitude,
-            'lng' => $faker->longitude,
+            'name' => $this->faker->city,
+            'lat' => $this->faker->latitude,
+            'lng' => $this->faker->longitude,
         ];
     }
 }
