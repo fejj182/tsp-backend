@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $trip_id
  * @property string $destination_slug
  * @property int $position
+ * @property int $duration
  */
 class TripDestination extends Model
 {
     public $timestamps = false;
     protected $table = 'trip_destinations';
-    protected $fillable = ['trip_id', 'destination_slug', 'position'];
+    protected $fillable = ['trip_id', 'destination_slug', 'position', 'duration'];
 }

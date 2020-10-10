@@ -15,13 +15,18 @@ class TripsTest extends TestCase
     {
         parent::setUp();
 
-        $this->firstStop = $this->getDestinationJson();
-        $this->secondStop = $this->getDestinationJson();
+        $startingDestination = $this->getDestination();
+        $endingDestination = $this->getDestination();
+
+        $this->firstStop = $startingDestination;
+        $this->secondStop = $endingDestination;
+        $this->secondStop['duration'] = $this->faker->randomNumber();
 
         // note: creating this way to ensure property order in assertExactJson
-        $this->startingDestination = factory(Destination::class)->create($this->firstStop);
-        $this->endingDestination = factory(Destination::class)->create($this->secondStop);
+        $this->startingDestination = factory(Destination::class)->create($startingDestination);
+        $this->endingDestination = factory(Destination::class)->create($endingDestination);
     }
+
 
     public function testTripCreated()
     {
@@ -33,7 +38,7 @@ class TripsTest extends TestCase
 
     public function testTripNotCreatedIfDestinationDoesNotExist()
     {
-        $notExistingDestination = $this->getDestinationJson();
+        $notExistingDestination = $this->getDestination();
         $response = $this->post('/api/trip', ["trip" => array($notExistingDestination, $this->secondStop)]);
         $response->assertStatus(404);
     }
@@ -43,13 +48,15 @@ class TripsTest extends TestCase
         $this->post('/api/trip', ["trip" => array($this->firstStop, $this->secondStop)]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->startingDestination->slug,
-            'position' => 0
+            'destination_slug' => $this->firstStop["slug"],
+            'position' => 0,
+            'duration' => null
         ]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->endingDestination->slug,
-            'position' => 1
+            'destination_slug' => $this->secondStop["slug"],
+            'position' => 1,
+            'duration' => $this->secondStop["duration"]
         ]);
     }
 
@@ -61,9 +68,9 @@ class TripsTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertExactJson([
-            $this->startingDestination->toArray(),
-            $this->endingDestination->toArray(),
-            $this->startingDestination->toArray()
+            $this->firstStop,
+            $this->secondStop,
+            $this->firstStop
         ]);
     }
 
@@ -81,34 +88,35 @@ class TripsTest extends TestCase
 
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->endingDestination->slug,
+            'destination_slug' => $this->secondStop["slug"],
             'position' => 0
         ]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->startingDestination->slug,
+            'destination_slug' => $this->firstStop["slug"],
             'position' => 1
         ]);
 
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->startingDestination->slug,
+            'destination_slug' => $this->firstStop["slug"],
             'position' => 0
         ]);
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
-            'destination_slug' => $this->endingDestination->slug,
+            'destination_slug' => $this->secondStop["slug"],
             'position' => 1
         ]);
     }
 
-    protected function getDestinationJson(): array
+    protected function getDestination(): array
     {
         return [
             'id' => (string) Uuid::uuid4(),
             'name' => $this->faker->city,
+            'slug' => $this->faker->slug,
             'lat' => $this->faker->latitude,
-            'lng' => $this->faker->longitude,
+            'lng' => $this->faker->longitude
         ];
     }
 }

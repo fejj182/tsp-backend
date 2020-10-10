@@ -19,7 +19,13 @@ class TripController extends Controller
             $trip = Trip::create();
             foreach ($userTrip as $index => $stop) {
                 $destination = Destination::where('id', $stop["id"])->firstOrFail();
-                TripDestination::create(['trip_id' => $trip->id, 'destination_slug' => $destination["slug"], 'position' => $index]);
+                $duration = isset($stop["duration"]) ? $stop["duration"] : null;
+                TripDestination::create([
+                    'trip_id' => $trip->id, 
+                    'destination_slug' => $destination["slug"], 
+                    'position' => $index,
+                    'duration' => $duration
+                ]);
             }
         });
         return ["alias" => $trip->alias];
@@ -33,12 +39,14 @@ class TripController extends Controller
             abort(404);
         }
 
-        $destinationSlugs = $trip->tripDestinations()->pluck('destination_slug');
         $response = [];
 
-        foreach ($destinationSlugs as $slug) {
-            $nextDestination = Destination::where('slug', $slug)->first();
-            $response[] = $nextDestination;
+        foreach ($trip->tripDestinations()->get() as $tripDestination) {
+            $destination = Destination::where('slug', $tripDestination->destination_slug)->first();
+            if ($tripDestination->duration != null) {
+                $destination["duration"] = $tripDestination->duration; 
+            };
+            $response[] = $destination;
         }
 
         return $response;
