@@ -18,14 +18,7 @@ class TripController extends Controller
         DB::transaction(function () use ($userTrip, &$trip) {
             $trip = Trip::create();
             foreach ($userTrip as $index => $stop) {
-                $destination = Destination::where('id', $stop["id"])->firstOrFail();
-                $duration = isset($stop["duration"]) ? $stop["duration"] : null;
-                TripDestination::create([
-                    'trip_id' => $trip->id, 
-                    'destination_slug' => $destination["slug"], 
-                    'position' => $index,
-                    'duration' => $duration
-                ]);
+                $this->saveTripDestination($stop, $trip->id, $index);
             }
         });
         return ["alias" => $trip->alias];
@@ -58,9 +51,20 @@ class TripController extends Controller
         $trip = Trip::where('alias', $alias)->first();
         TripDestination::where('trip_id', $trip->id)->delete();
         foreach ($userTrip as $index => $stop) {
-            $destination = Destination::where('id', $stop["id"])->first();
-            TripDestination::create(['trip_id' => $trip->id, 'destination_slug' => $destination->slug, 'position' => $index]);
+            $this->saveTripDestination($stop, $trip->id, $index);
         }
         return 'success';
+    }
+
+    private function saveTripDestination(array $stop, int $tripId, int $position)
+    {
+        $destination = Destination::where('id', $stop["id"])->firstOrFail();
+        $duration = isset($stop["duration"]) ? $stop["duration"] : null;
+        TripDestination::create([
+            'trip_id' => $tripId, 
+            'destination_slug' => $destination["slug"], 
+            'position' => $position,
+            'duration' => $duration
+        ]);
     }
 }

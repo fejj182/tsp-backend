@@ -89,23 +89,27 @@ class TripsTest extends TestCase
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
             'destination_slug' => $this->secondStop["slug"],
-            'position' => 0
+            'position' => 0,
+            'duration' => $this->secondStop["duration"]
         ]);
         $this->assertDatabaseHas('trip_destinations', [
             'trip_id' => '1',
             'destination_slug' => $this->firstStop["slug"],
-            'position' => 1
+            'position' => 1,
+            'duration' => null
         ]);
 
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
             'destination_slug' => $this->firstStop["slug"],
-            'position' => 0
+            'position' => 0,
+            'duration' => null
         ]);
         $this->assertDatabaseMissing('trip_destinations', [
             'trip_id' => '1',
             'destination_slug' => $this->secondStop["slug"],
-            'position' => 1
+            'position' => 1,
+            'duration' => $this->secondStop["duration"]
         ]);
     }
 
