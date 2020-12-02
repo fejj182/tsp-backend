@@ -11,8 +11,8 @@ class FeedbackController extends Controller
 {
     public function create(Request $request)
     {
-        $name = $request->input('name');
-        $email = $request->input('email');
+        $name = $request->input('name') ? $request->input('name') : 'Not provided';
+        $email = $request->input('email') ? $request->input('email') : 'Not provided';
         $feedback = $request->input('feedback');
 
         Mail::to('jeff@trainspotter.co')->send(new SendFeedback($name, $email, $feedback));
