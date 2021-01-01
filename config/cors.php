@@ -1,66 +1,42 @@
+
 <?php
 
 return [
 
     /*
-     * A cors profile determines which origins, methods, headers are allowed for
-     * a given requests. The `DefaultProfile` reads its configuration from this
-     * config file.
-     *
-     * You can easily create your own cors profile.
-     * More info: https://github.com/spatie/laravel-cors/#creating-your-own-cors-profile
-     */
-    'cors_profile' => Spatie\Cors\CorsProfile\DefaultProfile::class,
+    |--------------------------------------------------------------------------
+    | Cross-Origin Resource Sharing (CORS) Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure your settings for cross-origin resource sharing
+    | or "CORS". This determines what cross-origin operations may execute
+    | in web browsers. You are free to adjust these settings as needed.
+    |
+    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+    |
+    */
 
-    /*
-     * This configuration is used by `DefaultProfile`.
-     */
-    'default_profile' => [
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-        'allow_credentials' => false,
+    'allowed_methods' => ['*'],
 
-        'allow_origins' => [
-            'https://afternoon-citadel-44487.herokuapp.com',
-            'https://compassionate-kalam-c86cc7.netlify.com',
-            'https://*--compassionate-kalam-c86cc7.netlify.app',
-            'https://trainspotter.co',
-            'http://localhost:8080'
-            //TODO: is this a security problem?
-        ],
-
-        'allow_methods' => [
-            'POST',
-            'GET',
-            'OPTIONS',
-            'PUT',
-            'PATCH',
-            'DELETE',
-        ],
-
-        'allow_headers' => [
-            'Content-Type',
-            'X-Auth-Token',
-            'Origin',
-            'Authorization',
-        ],
-
-        'expose_headers' => [
-            'Cache-Control',
-            'Content-Language',
-            'Content-Type',
-            'Expires',
-            'Last-Modified',
-            'Pragma',
-        ],
-
-        'forbidden_response' => [
-            'message' => 'Forbidden (cors).',
-            'status' => 403,
-        ],
-
-        /*
-         * Preflight request will respond with value for the max age header.
-         */
-        'max_age' => 60 * 60 * 24,
+    'allowed_origins' => [
+        'https://afternoon-citadel-44487.herokuapp.com',
+        'https://compassionate-kalam-c86cc7.netlify.com',
+        'https://*--compassionate-kalam-c86cc7.netlify.app',
+        'https://trainspotter.co',
+        'http://localhost:8080'
+        //TODO: is this a security problem?
     ],
+
+    'allowed_origins_patterns' => [],
+
+    'allowed_headers' => ['*'],
+
+    'exposed_headers' => [],
+
+    'max_age' => 0,
+
+    'supports_credentials' => false,
+
 ];
