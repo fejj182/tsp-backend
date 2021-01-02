@@ -16,6 +16,7 @@
         "inspector-apm/inspector-laravel": "^4.5",
         "laravel/framework": "^7.0",
         "laravel/tinker": "^2.0",
+        "laravel/ui": "^2.4",
         "ramsey/uuid": "^3.9"
     },
     "require-dev": {
