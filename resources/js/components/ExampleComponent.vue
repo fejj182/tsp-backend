@@ -2,13 +2,17 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">Example Component</div>
-
-                    <div class="card-body">
-                        I'm an example component.
-                    </div>
-                </div>
+                <v-card>
+                    <v-card-title>
+                        Example Component
+                    </v-card-title>
+                    <v-card-text>
+                        I'm a Vuetify example component
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-autocomplete label="Type here..." :items="items" filled rounded></v-autocomplete>
+                    </v-card-actions>
+                </v-card>
             </div>
         </div>
     </div>
@@ -16,6 +20,9 @@
 
 <script>
     export default {
+        data: () => ({
+            items: ['foo', 'bar', 'fizz', 'buzz']
+        }),
         mounted() {
             console.log('Component mounted.')
         }
