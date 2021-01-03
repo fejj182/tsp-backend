@@ -1840,6 +1840,15 @@ module.exports = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash_deburr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/deburr */ "./node_modules/lodash/deburr.js");
 /* harmony import */ var lodash_deburr__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_deburr__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -1881,6 +1890,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     stations: {
@@ -1913,6 +1923,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     onAddStation: function onAddStation() {
       this.stops.push({});
+    },
+    onSubmit: function onSubmit() {
+      axios__WEBPACK_IMPORTED_MODULE_1___default.a.post("/api/route", {
+        route: this.stops
+      });
     }
   }
 });
@@ -38795,47 +38810,65 @@ var render = function() {
             _c(
               "v-card-actions",
               [
-                _vm._l(_vm.stops, function(stop, index) {
-                  return _c("v-autocomplete", {
-                    key: index,
-                    attrs: {
-                      label: "Type here...",
-                      items: _vm.items,
-                      filter: _vm.autocompleteFilter,
-                      filled: "",
-                      rounded: ""
-                    },
-                    on: { change: _vm.onChangeStation },
-                    scopedSlots: _vm._u(
-                      [
-                        {
-                          key: "item",
-                          fn: function(ref) {
-                            var item = ref.item
-                            return [_c("span", [_vm._v(_vm._s(item.text))])]
-                          }
-                        }
-                      ],
-                      null,
-                      true
-                    ),
-                    model: {
-                      value: _vm.stops[index],
-                      callback: function($$v) {
-                        _vm.$set(_vm.stops, index, $$v)
-                      },
-                      expression: "stops[index]"
-                    }
-                  })
-                }),
-                _vm._v(" "),
                 _c(
-                  "v-btn",
-                  { attrs: { text: "" }, on: { click: _vm.onAddStation } },
-                  [_vm._v("\n          + Add destination\n        ")]
+                  "v-form",
+                  {
+                    on: {
+                      submit: function($event) {
+                        $event.preventDefault()
+                        return _vm.onSubmit($event)
+                      }
+                    }
+                  },
+                  [
+                    _vm._l(_vm.stops, function(stop, index) {
+                      return _c("v-autocomplete", {
+                        key: index,
+                        attrs: {
+                          label: "Type here...",
+                          items: _vm.items,
+                          filter: _vm.autocompleteFilter,
+                          filled: "",
+                          rounded: ""
+                        },
+                        on: { change: _vm.onChangeStation },
+                        scopedSlots: _vm._u(
+                          [
+                            {
+                              key: "item",
+                              fn: function(ref) {
+                                var item = ref.item
+                                return [_c("span", [_vm._v(_vm._s(item.text))])]
+                              }
+                            }
+                          ],
+                          null,
+                          true
+                        ),
+                        model: {
+                          value: _vm.stops[index],
+                          callback: function($$v) {
+                            _vm.$set(_vm.stops, index, $$v)
+                          },
+                          expression: "stops[index]"
+                        }
+                      })
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "v-btn",
+                      { attrs: { text: "" }, on: { click: _vm.onAddStation } },
+                      [_vm._v("\n            + Add destination\n          ")]
+                    ),
+                    _vm._v(" "),
+                    _c("v-btn", { attrs: { type: "submit" } }, [
+                      _vm._v("\n            Submit\n          ")
+                    ])
+                  ],
+                  2
                 )
               ],
-              2
+              1
             )
           ],
           1

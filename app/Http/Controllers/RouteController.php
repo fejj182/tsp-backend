@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Route;
+use App\Models\RouteStop;
 use App\Models\Station;
+use DB;
 use Illuminate\Http\Request;
 
 class RouteController extends Controller
@@ -14,16 +17,33 @@ class RouteController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     /**
-     * Show the application dashboard.
-     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
     {
         return view('route-builder', ['stations' => Station::all()]);
+    }
+
+    public function create(Request $request)
+    {
+        $input = $request->input('route');
+
+        DB::transaction(function () use ($input) {
+            $route = Route::create();
+            foreach ($input as $index => $stop) {
+                echo($stop['id']);
+                RouteStop::create([
+                    'route_id' => $route->id,
+                    'station_id' => $stop['id'],
+                    'position' => $index,
+                ]);
+            }
+        });
+
+        return 'success';
     }
 }

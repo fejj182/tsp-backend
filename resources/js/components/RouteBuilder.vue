@@ -9,29 +9,36 @@
           Choose from the database of stations to build and submit a new route. Thank you!
         </v-card-text>
         <v-card-actions>
-          <v-autocomplete
-            v-for="(stop, index) in stops"
-            :key="index"
-            v-model="stops[index]"
-            label="Type here..."
-            :items="items"
-            :filter="autocompleteFilter"
-            filled
-            rounded
-            @change="onChangeStation"
+          <v-form
+            @submit.prevent="onSubmit"
           >
-            <!-- use template to stop .v-list-item__mask class being used, which was causing items 
+            <v-autocomplete
+              v-for="(stop, index) in stops"
+              :key="index"
+              v-model="stops[index]"
+              label="Type here..."
+              :items="items"
+              :filter="autocompleteFilter"
+              filled
+              rounded
+              @change="onChangeStation"
+            >
+              <!-- use template to stop .v-list-item__mask class being used, which was causing items 
                             with diacritics to be highlighted in full https://github.com/vuetifyjs/vuetify/pull/9618/files -->
-            <template #item="{ item }">
-              <span>{{ item.text }}</span>
-            </template>
-          </v-autocomplete>
-          <v-btn
-            text
-            @click="onAddStation"
-          >
-            + Add destination
-          </v-btn>
+              <template #item="{ item }">
+                <span>{{ item.text }}</span>
+              </template>
+            </v-autocomplete>
+            <v-btn
+              text
+              @click="onAddStation"
+            >
+              + Add destination
+            </v-btn>
+            <v-btn type="submit">
+              Submit
+            </v-btn>
+          </v-form>
         </v-card-actions>
       </v-card>
     </div>
@@ -40,6 +47,7 @@
 
 <script>
 import deburr from "lodash/deburr";
+import axios from "axios"
 
 export default {
     props: {
@@ -77,6 +85,9 @@ export default {
         },
         onAddStation() {
           this.stops.push({})
+        },
+        onSubmit() {
+          axios.post("/api/route", {route: this.stops});
         }
     }
 }

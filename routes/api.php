@@ -25,6 +25,8 @@ Route::post('/trip/{alias}', 'TripController@update');
 
 Route::post('/feedback', 'FeedbackController@create');
 
+Route::post('/route', 'RouteController@create');
+
 // <deprecated>
 Route::get('/stations', 'StationController@enabled');
 Route::post('/stations/nearest', 'StationController@nearest');

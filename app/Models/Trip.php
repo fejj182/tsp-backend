@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Trip extends Model
 {
-    public $timestamps = true;
     protected $table = 'trips';
 
     protected static function boot()
@@ -26,11 +25,6 @@ class Trip extends Model
                 //TODO: should retry if alias already exists
             }
         });
-    }
-
-    public function tripStops()
-    {
-        return $this->hasMany('App\Models\TripStop');
     }
 
     public function tripDestinations()
