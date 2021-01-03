@@ -7,10 +7,16 @@
                         Route Builder
                     </v-card-title>
                     <v-card-text>
-                        I'm a Vuetify example component
+                        Choose from the database of stations to build and submit a new route. Thank you!
                     </v-card-text>
                     <v-card-actions>
-                        <v-autocomplete label="Type here..." :items="items" filled rounded></v-autocomplete>
+                        <v-autocomplete label="Type here..." :items="items" :filter="autocompleteFilter" filled rounded>
+                            <!-- use template to stop .v-list-item__mask class being used, which was causing items 
+                            with diacritics to be highlighted in full https://github.com/vuetifyjs/vuetify/pull/9618/files -->
+                            <template v-slot:item="{ item }">
+                                <span>{{ item.text }}</span>
+                            </template>
+                        </v-autocomplete>
                     </v-card-actions>
                 </v-card>
             </div>
@@ -19,14 +25,33 @@
 </template>
 
 <script>
-    export default {
-        props: {
-            items: {
-                type: Array
-            }
-        },
-        mounted() {
-            console.log('Component mounted.')
+import deburr from "lodash/deburr";
+
+export default {
+    props: {
+        stations: {
+            type: Array
+        }
+    },
+    computed: {
+        items() {
+            return this.stations.map((destination) => {
+                return {
+                    text: destination.name,
+                    value: destination
+                }
+            })
+        }
+    },
+    methods: {
+        autocompleteFilter(item, queryText, itemText) {
+            // same as default but adding _.deburr
+            return (
+                deburr(itemText)
+                .toLocaleLowerCase()
+                .indexOf(queryText.toLocaleLowerCase()) > -1
+            );
         }
     }
+}
 </script>
