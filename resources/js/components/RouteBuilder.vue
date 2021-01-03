@@ -4,7 +4,7 @@
             <div class="col-md-8">
                 <v-card>
                     <v-card-title>
-                        Example Componentt
+                        Route Builder
                     </v-card-title>
                     <v-card-text>
                         I'm a Vuetify example component
