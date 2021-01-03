@@ -1859,10 +1859,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
-  data: function data() {
-    return {
-      items: ['foo', 'bar', 'fizz', 'buzz']
-    };
+  props: {
+    items: {
+      type: Array
+    }
   },
   mounted: function mounted() {
     console.log('Component mounted.');

@@ -20,9 +20,11 @@
 
 <script>
     export default {
-        data: () => ({
-            items: ['foo', 'bar', 'fizz', 'buzz']
-        }),
+        props: {
+            items: {
+                type: Array
+            }
+        },
         mounted() {
             console.log('Component mounted.')
         }
