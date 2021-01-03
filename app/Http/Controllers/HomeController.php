@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Station;
 use Illuminate\Http\Request;
 
-class RouteController extends Controller
+class HomeController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -24,6 +23,6 @@ class RouteController extends Controller
      */
     public function index()
     {
-        return view('route-builder', ['stations' => Station::all()]);
+        return view('home');
     }
 }
