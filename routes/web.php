@@ -14,3 +14,5 @@
 Auth::routes();
 
 Route::get('/', 'RouteController@index')->name('route-builder');
+
+Route::post('/route', 'RouteController@create');
