@@ -15,16 +15,12 @@ class TripsTest extends TestCase
     {
         parent::setUp();
 
-        $startingDestination = $this->getDestination();
-        $endingDestination = $this->getDestination();
+        $this->startingDestination = factory(Destination::class)->create();
+        $this->endingDestination = factory(Destination::class)->create();
 
-        $this->firstStop = $startingDestination;
-        $this->secondStop = $endingDestination;
+        $this->firstStop = $this->startingDestination->toArray();
+        $this->secondStop = $this->endingDestination->toArray();
         $this->secondStop['duration'] = $this->faker->randomNumber();
-
-        // note: creating this way to ensure property order in assertExactJson
-        $this->startingDestination = factory(Destination::class)->create($startingDestination);
-        $this->endingDestination = factory(Destination::class)->create($endingDestination);
     }
 
 
