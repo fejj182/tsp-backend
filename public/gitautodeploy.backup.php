@@ -1,5 +1,7 @@
 <?php
+const API_KEY = "";
 const API_URL = "https://api.cloudways.com/api/v1";
+const EMAIL = "";
 
 /* examples
 const BranchName = "master";
@@ -41,8 +43,8 @@ function callCloudwaysAPI($method, $url, $accessToken, $post = [])
 //Fetch Access Token
 $tokenResponse = callCloudwaysAPI('POST', '/oauth/access_token', null
     , [
-    'email' => env('CLOUDWAYS_EMAIL'),
-    'api_key' => env('CLOUDWAYS_API_KEY')
+    'email' => EMAIL,
+    'api_key' => API_KEY
     ]);
 
 $accessToken = $tokenResponse->access_token;
