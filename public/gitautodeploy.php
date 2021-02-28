@@ -1,11 +1,6 @@
 <?php
 const API_URL = "https://api.cloudways.com/api/v1";
 
-/* examples
-const BranchName = "master";
-const GitUrl = "git@bitbucket.org:user22/repo_name.git";
-*/
-
 //Use this function to contact CW API
 function callCloudwaysAPI($method, $url, $accessToken, $post = [])
 {
