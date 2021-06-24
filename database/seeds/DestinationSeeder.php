@@ -26,11 +26,11 @@ class DestinationSeeder extends Seeder
                     'id' => $uuid,
                     'name' => $row[0],
                     'slug' => $row[1],
-                    'lat' => round(floatval($row[2]), 6),
-                    'lng' => round(floatval($row[3]), 6),
-                    'country' => $row[4]
+                    'lat' => round(floatval($row[3]), 6),
+                    'lng' => round(floatval($row[4]), 6),
+                    'country' => $row[5]
                 ]);
-                $stationIdsCsv = $row[5];
+                $stationIdsCsv = $row[2];
                 $stationIds = explode(',', $stationIdsCsv);
                 foreach($stationIds as $id) {
                     Station::where('station_id', $id)
